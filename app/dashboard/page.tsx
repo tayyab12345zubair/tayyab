@@ -2,15 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 
 interface DashboardHeaderData {
   accountCode: string;
   balance: number;
   tag: string;
-  regId: string;
-  accountTitle: string;
-  saleLimit: number;
 }
 
 interface ActionButton {
@@ -25,9 +21,6 @@ export default function DashboardPage() {
     accountCode: "R777 - TT",
     balance: 41300,
     tag: "TTTT",
-    regId: "alii560",
-    accountTitle: "TT - ALI",
-    saleLimit: 50000,
   });
 
   const [currentDateTime, setCurrentDateTime] = useState({
@@ -39,7 +32,8 @@ export default function DashboardPage() {
   const [currentTheme, setCurrentTheme] = useState<"dark" | "light">("dark");
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
 
-  function handleLogout() {
+  function handleLogout(e: React.MouseEvent) {
+    e.preventDefault();
     router.push("/login");
   }
 
@@ -70,10 +64,7 @@ export default function DashboardPage() {
       cardBorder: "#2a2a2a",
       sidebarBg: "#152e24",
       sidebarText: "#ffffff",
-      infoBarBg: "#29292b",
-      infoBarBorder: "#19191a",
       wrapperBg: "#121212",
-      profileShadow: "0 4px 16px rgba(255, 255, 255, 0.08)",
     },
     light: {
       bg: "#f4f4f5",
@@ -83,10 +74,7 @@ export default function DashboardPage() {
       cardBorder: "#e4e4e7",
       sidebarBg: "#ffffff",
       sidebarText: "#000000",
-      infoBarBg: "#ffffff",
-      infoBarBorder: "#e4e4e7",
       wrapperBg: "transparent",
-      profileShadow: "0 4px 12px rgba(0, 0, 0, 0.12)",
     },
   };
 
@@ -164,7 +152,10 @@ export default function DashboardPage() {
         >
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <button
-              onClick={() => setIsSidebarOpen(true)}
+              onClick={(e) => {
+                e.preventDefault();
+                setIsSidebarOpen(true);
+              }}
               style={{
                 background: "none",
                 border: "none",
@@ -295,65 +286,13 @@ export default function DashboardPage() {
             </button>
           </div>
         </header>
-
-        {/* USER PROFILE / INFO BAR */}
-        <div style={{ padding: "10px 16px", backgroundColor: "transparent" }}>
-          <section
-            style={{
-              backgroundColor: t.infoBarBg,
-              color: t.textPrimary,
-              padding: "10px 16px",
-              display: "flex",
-              alignItems: "center",
-              gap: "16px",
-              borderRadius: "12px",
-              border: `1px solid ${t.infoBarBorder}`,
-              boxShadow: t.profileShadow,
-            }}
-          >
-            <div
-              style={{
-                width: "48px",
-                height: "48px",
-                borderRadius: "6px",
-                backgroundColor: currentTheme === "dark" ? "#101f19" : "#f4f4f5",
-                overflow: "hidden",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                border: `1px solid ${t.infoBarBorder}`,
-                flexShrink: 0,
-              }}
-            >
-              <Image
-                src="/Logo.png"
-                alt="Account Logo"
-                width={42}
-                height={42}
-                style={{ objectFit: "contain" }}
-              />
-            </div>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
-              <div style={{ fontSize: "15px", fontWeight: "bold" }}>
-                Reg ID: <span>{headerData.regId}</span>
-              </div>
-              <div style={{ fontSize: "12px", color: t.textSecondary, fontWeight: "500" }}>
-                A/C: {headerData.accountTitle}
-              </div>
-              <div style={{ fontSize: "13px", color: "#34d399", fontWeight: "600" }}>
-                Sale Limit: {headerData.saleLimit.toLocaleString()}
-              </div>
-            </div>
-          </section>
-        </div>
       </div>
 
       {/* ================= MAIN CONTENT AREA ================= */}
       <main
         style={{
           padding: "20px",
-          paddingTop: "180px",
+          paddingTop: "75px",
           maxWidth: "800px",
           margin: "0 auto",
         }}
@@ -367,11 +306,14 @@ export default function DashboardPage() {
               padding: "40px 20px",
               textAlign: "center",
               boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-              marginTop: "20px",
+              marginTop: "10px",
             }}
           >
             <button
-              onClick={() => setSelectedAction(null)}
+              onClick={(e) => {
+                e.preventDefault();
+                setSelectedAction(null);
+              }}
               style={{
                 marginBottom: "24px",
                 padding: "8px 16px",
@@ -410,7 +352,10 @@ export default function DashboardPage() {
               {actionButtons.map((btn, index) => (
                 <button
                   key={index}
-                  onClick={() => setSelectedAction(btn.name)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setSelectedAction(btn.name);
+                  }}
                   style={{
                     backgroundColor: t.cardBg,
                     border: `1px solid ${t.cardBorder}`,
@@ -451,7 +396,10 @@ export default function DashboardPage() {
             zIndex: 1000,
             display: "flex",
           }}
-          onClick={() => setIsSidebarOpen(false)}
+          onClick={(e) => {
+            e.preventDefault();
+            setIsSidebarOpen(false);
+          }}
         >
           <div
             style={{
@@ -474,7 +422,10 @@ export default function DashboardPage() {
                 Menu
               </span>
               <button
-                onClick={() => setIsSidebarOpen(false)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setIsSidebarOpen(false);
+                }}
                 style={{
                   background: "transparent",
                   border: "none",
@@ -489,7 +440,10 @@ export default function DashboardPage() {
 
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
               <button
-                onClick={toggleTheme}
+                onClick={(e) => {
+                  e.preventDefault();
+                  toggleTheme();
+                }}
                 style={{
                   width: "100%",
                   padding: "12px",
