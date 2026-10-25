@@ -65,8 +65,9 @@ export default function DashboardPage() {
       cardBorder: "#2a2a2a",
       sidebarBg: "#152e24",
       sidebarText: "#ffffff",
-      infoBarBg: "#172b23",
-      infoBarBorder: "#234a3c",
+      // Requested Dark Mode Colors for Profile Box
+      infoBarBg: "#29292b",
+      infoBarBorder: "#19191a",
     },
     light: {
       bg: "#f4f4f5",
@@ -287,59 +288,63 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        <section
-          style={{
-            backgroundColor: t.infoBarBg,
-            color: t.textPrimary,
-            padding: "10px 16px",
-            display: "flex",
-            alignItems: "center",
-            gap: "16px",
-            borderBottom: `1px solid ${t.infoBarBorder}`,
-          }}
-        >
-          <div
+        {/* USER PROFILE / INFO BAR (Updated with margins, rounded corners & custom dark colors) */}
+        <div style={{ padding: "8px 12px", backgroundColor: "transparent" }}>
+          <section
             style={{
-              width: "48px",
-              height: "48px",
-              borderRadius: "6px",
-              backgroundColor: currentTheme === "dark" ? "#101f19" : "#f4f4f5",
-              overflow: "hidden",
+              backgroundColor: t.infoBarBg,
+              color: t.textPrimary,
+              padding: "10px 16px",
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
+              gap: "16px",
+              borderRadius: "10px",
               border: `1px solid ${t.infoBarBorder}`,
-              flexShrink: 0,
             }}
           >
-            <Image
-              src="/Logo.png"
-              alt="Account Logo"
-              width={42}
-              height={42}
-              style={{ objectFit: "contain" }}
-            />
-          </div>
+            <div
+              style={{
+                width: "48px",
+                height: "48px",
+                borderRadius: "6px",
+                backgroundColor: currentTheme === "dark" ? "#101f19" : "#f4f4f5",
+                overflow: "hidden",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                border: `1px solid ${t.infoBarBorder}`,
+                flexShrink: 0,
+              }}
+            >
+              <Image
+                src="/Logo.png"
+                alt="Account Logo"
+                width={42}
+                height={42}
+                style={{ objectFit: "contain" }}
+              />
+            </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
-            <div style={{ fontSize: "15px", fontWeight: "bold" }}>
-              Reg ID: <span>{headerData.regId}</span>
+            <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
+              <div style={{ fontSize: "15px", fontWeight: "bold" }}>
+                Reg ID: <span>{headerData.regId}</span>
+              </div>
+              <div style={{ fontSize: "12px", color: t.textSecondary, fontWeight: "500" }}>
+                A/C: {headerData.accountTitle}
+              </div>
+              <div style={{ fontSize: "13px", color: "#34d399", fontWeight: "600" }}>
+                Sale Limit: {headerData.saleLimit.toLocaleString()}
+              </div>
             </div>
-            <div style={{ fontSize: "12px", color: t.textSecondary, fontWeight: "500" }}>
-              A/C: {headerData.accountTitle}
-            </div>
-            <div style={{ fontSize: "13px", color: "#34d399", fontWeight: "600" }}>
-              Sale Limit: {headerData.saleLimit.toLocaleString()}
-            </div>
-          </div>
-        </section>
+          </section>
+        </div>
       </div>
 
       {/* ================= SCROLLABLE DASHBOARD ACTION BUTTONS ================= */}
       <main
         style={{
           padding: "20px",
-          paddingTop: "150px", // Header ke neeche content chupne se bachane ke liye top spacing
+          paddingTop: "170px", // Adjusted top space for the new spaced profile box
           maxWidth: "800px",
           margin: "0 auto",
         }}
