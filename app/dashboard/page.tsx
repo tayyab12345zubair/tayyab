@@ -36,11 +36,16 @@ export default function DashboardPage() {
   });
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
   const [currentTheme, setCurrentTheme] = useState<"dark" | "light">("dark");
 
   function handleLogout() {
     router.push("/login");
+  }
+
+  // Direct toggle function for theme without modal dialog
+  function toggleTheme() {
+    setCurrentTheme((prev) => (prev === "dark" ? "light" : "dark"));
+    setIsSidebarOpen(false); // Sidebar bhi band ho jayega click karne par
   }
 
   useEffect(() => {
@@ -65,7 +70,6 @@ export default function DashboardPage() {
       cardBorder: "#2a2a2a",
       sidebarBg: "#152e24",
       sidebarText: "#ffffff",
-      // Requested Dark Mode Colors for Profile Box
       infoBarBg: "#29292b",
       infoBarBorder: "#19191a",
     },
@@ -288,7 +292,7 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        {/* USER PROFILE / INFO BAR (Updated with margins, rounded corners & custom dark colors) */}
+        {/* USER PROFILE / INFO BAR */}
         <div style={{ padding: "8px 12px", backgroundColor: "transparent" }}>
           <section
             style={{
@@ -344,7 +348,7 @@ export default function DashboardPage() {
       <main
         style={{
           padding: "20px",
-          paddingTop: "170px", // Adjusted top space for the new spaced profile box
+          paddingTop: "170px",
           maxWidth: "800px",
           margin: "0 auto",
         }}
@@ -440,10 +444,7 @@ export default function DashboardPage() {
 
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
               <button
-                onClick={() => {
-                  setIsSidebarOpen(false);
-                  setIsThemeModalOpen(true);
-                }}
+                onClick={toggleTheme}
                 style={{
                   width: "100%",
                   padding: "12px",
@@ -460,101 +461,9 @@ export default function DashboardPage() {
                   fontWeight: "500",
                 }}
               >
-                🎨 Theme Change
+                Theme ({currentTheme === "dark" ? "Dark Mode" : "Light Mode"})
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* ================= THEME CHANGE POPUP MODAL ================= */}
-      {isThemeModalOpen && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0, 0, 0, 0.7)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1100,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: currentTheme === "dark" ? "#1a1a1a" : "#ffffff",
-              color: currentTheme === "dark" ? "#ffffff" : "#000000",
-              border: `1px solid ${t.cardBorder}`,
-              borderRadius: "12px",
-              padding: "24px",
-              width: "100%",
-              maxWidth: "320px",
-              boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.5)",
-              textAlign: "center",
-            }}
-          >
-            <h3 style={{ fontSize: "18px", fontWeight: "600", marginBottom: "8px" }}>
-              Select Theme
-            </h3>
-            <p style={{ fontSize: "13px", color: t.textSecondary, marginBottom: "20px" }}>
-              Switch between Black and White modes.
-            </p>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "20px" }}>
-              <button
-                onClick={() => {
-                  setCurrentTheme("dark");
-                  setIsThemeModalOpen(false);
-                }}
-                style={{
-                  padding: "10px",
-                  borderRadius: "8px",
-                  backgroundColor: currentTheme === "dark" ? "#333333" : "#f4f4f5",
-                  color: currentTheme === "dark" ? "#ffffff" : "#000000",
-                  border: "1px solid #444444",
-                  cursor: "pointer",
-                  fontWeight: "500",
-                }}
-              >
-                Black Mode
-              </button>
-
-              <button
-                onClick={() => {
-                  setCurrentTheme("light");
-                  setIsThemeModalOpen(false);
-                }}
-                style={{
-                  padding: "10px",
-                  borderRadius: "8px",
-                  backgroundColor: currentTheme === "light" ? "#e4e4e7" : "#1a1a1a",
-                  color: currentTheme === "light" ? "#000000" : "#ffffff",
-                  border: "1px solid #cccccc",
-                  cursor: "pointer",
-                  fontWeight: "500",
-                }}
-              >
-                White Mode
-              </button>
-            </div>
-
-            <button
-              onClick={() => setIsThemeModalOpen(false)}
-              style={{
-                width: "100%",
-                padding: "10px",
-                borderRadius: "8px",
-                backgroundColor: "transparent",
-                color: t.textSecondary,
-                border: `1px solid ${t.cardBorder}`,
-                cursor: "pointer",
-              }}
-            >
-              Cancel
-            </button>
           </div>
         </div>
       )}
