@@ -71,7 +71,7 @@ export default function DashboardPage() {
       sidebarBg: "#152e24",
       sidebarText: "#ffffff",
       infoBarBg: "#29292b",
-      infoBarBorder: "#19191a",
+      infoBarBorder: "#1b3a2f",
     },
     light: {
       bg: "#f4f4f5",
