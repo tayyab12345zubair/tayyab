@@ -51,6 +51,17 @@ export default function DashboardPage() {
     setIsSidebarOpen(false);
   }
 
+  // Disable right-click globally across the app
+  useEffect(() => {
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+    };
+    window.addEventListener("contextmenu", handleContextMenu);
+    return () => {
+      window.removeEventListener("contextmenu", handleContextMenu);
+    };
+  }, []);
+
   useEffect(() => {
     const updateDateTime = () => {
       const now = new Date();
@@ -302,7 +313,7 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        {/* USER PROFILE / INFO BAR - Increased width and line spacing, added TBD */}
+        {/* USER PROFILE / INFO BAR */}
         {selectedAction === null && (
           <div style={{ padding: "10px 16px", backgroundColor: "transparent" }}>
             <section
