@@ -13,6 +13,11 @@ interface DashboardHeaderData {
   saleLimit: number;
 }
 
+interface ActionButton {
+  name: string;
+  desc?: string;
+}
+
 export default function DashboardPage() {
   const router = useRouter();
 
@@ -82,8 +87,8 @@ export default function DashboardPage() {
 
   const t = themeStyles[currentTheme];
 
-  // Action Buttons (A, B, C, D etc.) arranged 2 in a row
-  const actionButtons = [
+  // Action Buttons (A, B, C, D etc.) arranged 2 in a row with proper TypeScript Typing
+  const actionButtons: ActionButton[] = [
     { name: "Button A", },
     { name: "Button B", },
     { name: "Button C", },
@@ -93,23 +98,30 @@ export default function DashboardPage() {
     { name: "Button G", },
     { name: "Button H", },
     { name: "Button I", },
-    { name: "Button J",  },
-    { name: "Button K",  },
-    { name: "Button L",  },
-    { name: "Button M",  },
-    { name: "Button N",  },
-    { name: "Button O",  },
-    { name: "Button P",  },
-    { name: "Button Q",  },
-    { name: "Button R",  },
-    { name: "Button S",  },
-    { name: "Button T",  },
-    { name: "Button U",  },
-    { name: "Button V",  },
-    { name: "Button W",  },
-    { name: "Button X",  },
-    { name: "Button Y",  },
-    { name: "Button Z",  },
+    { name: "Button J", },
+    { name: "Button K", },
+    { name: "Button L", },
+    { name: "Button M", },
+    { name: "Button N", },
+    { name: "Button O", },
+    { name: "Button P", },
+    { name: "Button Q", },
+    { name: "Button R", },
+    { name: "Button S", },
+    { name: "Button T", },
+    { name: "Button U", },
+    { name: "Button V", },
+    { name: "Button W", },
+    { name: "Button X", },
+    { name: "Button Y", },
+    { name: "Button Z", },
+    { name: "Button 1", },
+    { name: "Button 2", },
+    { name: "Button 3", },
+    { name: "Button 4", },
+    { name: "Button 5", },
+    { name: "Button 6", },
+    
   ];
 
   return (
@@ -373,9 +385,11 @@ export default function DashboardPage() {
               <div style={{ fontSize: "16px", fontWeight: "bold", marginBottom: "4px" }}>
                 {btn.name}
               </div>
-              <div style={{ fontSize: "12px", color: t.textSecondary }}>
-                {btn.desc}
-              </div>
+              {btn.desc && (
+                <div style={{ fontSize: "12px", color: t.textSecondary }}>
+                  {btn.desc}
+                </div>
+              )}
             </button>
           ))}
         </div>
