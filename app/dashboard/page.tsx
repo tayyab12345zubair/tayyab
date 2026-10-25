@@ -37,6 +37,7 @@ export default function DashboardPage() {
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentTheme, setCurrentTheme] = useState<"dark" | "light">("dark");
+  const [selectedAction, setSelectedAction] = useState<string | null>(null);
 
   function handleLogout() {
     router.push("/login");
@@ -70,7 +71,7 @@ export default function DashboardPage() {
       sidebarBg: "#152e24",
       sidebarText: "#ffffff",
       infoBarBg: "#29292b",
-      infoBarBorder: "#1b3a2f",
+      infoBarBorder: "#19191a",
       wrapperBg: "#121212",
       profileShadow: "0 4px 16px rgba(255, 255, 255, 0.08)",
     },
@@ -145,7 +146,6 @@ export default function DashboardPage() {
           left: 0,
           zIndex: 900,
           width: "100%",
-          // Background shadow removed completely so no background box appears behind the profile card
           backgroundColor: t.wrapperBg,
         }}
       >
@@ -296,7 +296,7 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        {/* USER PROFILE / INFO BAR (Floating Card with clean shadow) */}
+        {/* USER PROFILE / INFO BAR */}
         <div style={{ padding: "10px 16px", backgroundColor: "transparent" }}>
           <section
             style={{
@@ -349,7 +349,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ================= SCROLLABLE DASHBOARD ACTION BUTTONS ================= */}
+      {/* ================= MAIN CONTENT AREA ================= */}
       <main
         style={{
           padding: "20px",
@@ -358,44 +358,84 @@ export default function DashboardPage() {
           margin: "0 auto",
         }}
       >
-        <h2 style={{ fontSize: "16px", fontWeight: "600", marginBottom: "16px", color: t.textPrimary }}>
-          Quick Actions
-        </h2>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
-            gap: "14px",
-            marginBottom: "24px",
-          }}
-        >
-          {actionButtons.map((btn, index) => (
+        {selectedAction ? (
+          <div
+            style={{
+              backgroundColor: t.cardBg,
+              border: `1px solid ${t.cardBorder}`,
+              borderRadius: "20px",
+              padding: "40px 20px",
+              textAlign: "center",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+              marginTop: "20px",
+            }}
+          >
             <button
-              key={index}
+              onClick={() => setSelectedAction(null)}
               style={{
-                backgroundColor: t.cardBg,
-                border: `1px solid ${t.cardBorder}`,
-                borderRadius: "20px",
-                padding: "36px",
-                textAlign: "left",
+                marginBottom: "24px",
+                padding: "8px 16px",
+                backgroundColor: "#10b981",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: "8px",
                 cursor: "pointer",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                transition: "all 0.2s ease",
-                color: t.textPrimary,
+                fontWeight: "600",
+                fontSize: "14px",
               }}
             >
-              <div style={{ fontSize: "16px", fontWeight: "bold", marginBottom: "4px" }}>
-                {btn.name}
-              </div>
-              {btn.desc && (
-                <div style={{ fontSize: "12px", color: t.textSecondary }}>
-                  {btn.desc}
-                </div>
-              )}
+              ← Back to Dashboard
             </button>
-          ))}
-        </div>
+            <h2 style={{ fontSize: "22px", fontWeight: "bold", marginBottom: "8px", color: t.textPrimary }}>
+              {selectedAction}
+            </h2>
+            <p style={{ fontSize: "16px", color: t.textSecondary, fontWeight: "500" }}>
+              Coming Soon...
+            </p>
+          </div>
+        ) : (
+          <>
+            <h2 style={{ fontSize: "16px", fontWeight: "600", marginBottom: "16px", color: t.textPrimary }}>
+              Quick Actions
+            </h2>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2, 1fr)",
+                gap: "14px",
+                marginBottom: "24px",
+              }}
+            >
+              {actionButtons.map((btn, index) => (
+                <button
+                  key={index}
+                  onClick={() => setSelectedAction(btn.name)}
+                  style={{
+                    backgroundColor: t.cardBg,
+                    border: `1px solid ${t.cardBorder}`,
+                    borderRadius: "20px",
+                    padding: "36px",
+                    textAlign: "left",
+                    cursor: "pointer",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                    transition: "all 0.2s ease",
+                    color: t.textPrimary,
+                  }}
+                >
+                  <div style={{ fontSize: "16px", fontWeight: "bold", marginBottom: "4px" }}>
+                    {btn.name}
+                  </div>
+                  {btn.desc && (
+                    <div style={{ fontSize: "12px", color: t.textSecondary }}>
+                      {btn.desc}
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
       </main>
 
       {/* ================= SIDEBAR DRAWER ================= */}
