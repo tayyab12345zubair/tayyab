@@ -11,6 +11,7 @@ interface DashboardHeaderData {
   regId: string;
   accountTitle: string;
   saleLimit: number;
+  tbd: string;
 }
 
 interface ActionButton {
@@ -28,6 +29,7 @@ export default function DashboardPage() {
     regId: "alii560",
     accountTitle: "TT - ALI",
     saleLimit: 50000,
+    tbd: "TBD Value",
   });
 
   const [currentDateTime, setCurrentDateTime] = useState({
@@ -300,26 +302,28 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        {/* USER PROFILE / INFO BAR - Sirf Dashboard par show hoga, button click par hide rahega */}
+        {/* USER PROFILE / INFO BAR - Increased width and line spacing, added TBD */}
         {selectedAction === null && (
           <div style={{ padding: "10px 16px", backgroundColor: "transparent" }}>
             <section
               style={{
                 backgroundColor: t.infoBarBg,
                 color: t.textPrimary,
-                padding: "10px 16px",
+                padding: "14px 20px",
                 display: "flex",
                 alignItems: "center",
-                gap: "16px",
+                gap: "20px",
                 borderRadius: "12px",
                 border: `1px solid ${t.infoBarBorder}`,
                 boxShadow: t.profileShadow,
+                maxWidth: "800px",
+                margin: "0 auto",
               }}
             >
               <div
                 style={{
-                  width: "48px",
-                  height: "48px",
+                  width: "56px",
+                  height: "56px",
                   borderRadius: "6px",
                   backgroundColor: currentTheme === "dark" ? "#101f19" : "#f4f4f5",
                   overflow: "hidden",
@@ -333,21 +337,24 @@ export default function DashboardPage() {
                 <Image
                   src="/Logo.png"
                   alt="Account Logo"
-                  width={42}
-                  height={42}
+                  width={48}
+                  height={48}
                   style={{ objectFit: "contain" }}
                 />
               </div>
 
-              <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
-                <div style={{ fontSize: "15px", fontWeight: "bold" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "5px", width: "100%" }}>
+                <div style={{ fontSize: "16px", fontWeight: "bold" }}>
                   Reg ID: <span>{headerData.regId}</span>
                 </div>
-                <div style={{ fontSize: "12px", color: t.textSecondary, fontWeight: "500" }}>
+                <div style={{ fontSize: "13px", color: t.textSecondary, fontWeight: "500" }}>
                   A/C: {headerData.accountTitle}
                 </div>
-                <div style={{ fontSize: "13px", color: "#34d399", fontWeight: "600" }}>
+                <div style={{ fontSize: "14px", color: "#34d399", fontWeight: "600" }}>
                   Sale Limit: {headerData.saleLimit.toLocaleString()}
+                </div>
+                <div style={{ fontSize: "13px", color: t.textSecondary, fontWeight: "500" }}>
+                  TBD: {headerData.tbd}
                 </div>
               </div>
             </section>
@@ -359,7 +366,7 @@ export default function DashboardPage() {
       <main
         style={{
           padding: "20px",
-          paddingTop: selectedAction === null ? "180px" : "75px",
+          paddingTop: selectedAction === null ? "210px" : "75px",
           maxWidth: "800px",
           margin: "0 auto",
         }}
