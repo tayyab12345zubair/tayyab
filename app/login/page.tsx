@@ -59,8 +59,8 @@ export default function LoginPage() {
           <Image
             src="/Logo.png"
             alt="Logo"
-            width={110}
-            height={130}
+            width={210}
+            height={230}
             priority
             style={{ objectFit: "contain" }}
           />
