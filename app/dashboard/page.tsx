@@ -42,10 +42,9 @@ export default function DashboardPage() {
     router.push("/login");
   }
 
-  // Direct toggle function for theme without modal dialog
   function toggleTheme() {
     setCurrentTheme((prev) => (prev === "dark" ? "light" : "dark"));
-    setIsSidebarOpen(false); // Sidebar bhi band ho jayega click karne par
+    setIsSidebarOpen(false);
   }
 
   useEffect(() => {
@@ -72,6 +71,7 @@ export default function DashboardPage() {
       sidebarText: "#ffffff",
       infoBarBg: "#29292b",
       infoBarBorder: "#1b3a2f",
+      wrapperBg: "#121212",
     },
     light: {
       bg: "#f4f4f5",
@@ -81,8 +81,9 @@ export default function DashboardPage() {
       cardBorder: "#e4e4e7",
       sidebarBg: "#ffffff",
       sidebarText: "#000000",
-      infoBarBg: "#ffffff",
-      infoBarBorder: "#1b3a2f",
+      infoBarBg: "transparent",
+      infoBarBorder: "transparent",
+      wrapperBg: "transparent", // Light mode me wrapper bilkul transparent
     },
   };
 
@@ -143,6 +144,7 @@ export default function DashboardPage() {
           zIndex: 900,
           width: "100%",
           boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+          backgroundColor: t.wrapperBg, // Transparent in light mode
         }}
       >
         <header
@@ -302,8 +304,8 @@ export default function DashboardPage() {
               display: "flex",
               alignItems: "center",
               gap: "16px",
-              borderRadius: "10px",
-              border: `1px solid ${t.infoBarBorder}`,
+              borderRadius: currentTheme === "dark" ? "10px" : "0px",
+              border: currentTheme === "dark" ? `1px solid ${t.infoBarBorder}` : "none",
             }}
           >
             <div
@@ -311,12 +313,12 @@ export default function DashboardPage() {
                 width: "48px",
                 height: "48px",
                 borderRadius: "6px",
-                backgroundColor: currentTheme === "dark" ? "#101f19" : "#f4f4f5",
+                backgroundColor: currentTheme === "dark" ? "#101f19" : "transparent",
                 overflow: "hidden",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                border: `1px solid ${t.infoBarBorder}`,
+                border: currentTheme === "dark" ? `1px solid ${t.infoBarBorder}` : "none",
                 flexShrink: 0,
               }}
             >
@@ -457,11 +459,28 @@ export default function DashboardPage() {
                   cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
-                  gap: "10px",
+                  gap: "12px",
                   fontWeight: "500",
                 }}
               >
-                Theme ({currentTheme === "dark" ? "Dark Mode" : "Light Mode"})
+                {currentTheme === "dark" ? (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                  </svg>
+                ) : (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                  </svg>
+                )}
+                <span>{currentTheme === "dark" ? "Light Mode" : "Dark Mode"}</span>
               </button>
             </div>
           </div>
