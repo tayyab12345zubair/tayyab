@@ -89,7 +89,7 @@ export default function DashboardPage() {
 
   // Action Buttons (A, B, C, D etc.) arranged 2 in a row with proper TypeScript Typing
   const actionButtons: ActionButton[] = [
-    { name: "Button A" },
+    { name: "Button A1" },
     { name: "Button B" },
     { name: "Button C" },
     { name: "Button D" },
