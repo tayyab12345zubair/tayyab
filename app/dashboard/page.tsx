@@ -72,6 +72,8 @@ export default function DashboardPage() {
       infoBarBg: "#29292b",
       infoBarBorder: "#1b3a2f",
       wrapperBg: "#121212",
+      // Dark mode me white shadow
+      profileShadow: "0 4px 16px rgba(255, 255, 255, 0.08)",
     },
     light: {
       bg: "#f4f4f5",
@@ -81,9 +83,11 @@ export default function DashboardPage() {
       cardBorder: "#e4e4e7",
       sidebarBg: "#ffffff",
       sidebarText: "#000000",
-      infoBarBg: "transparent",
-      infoBarBorder: "transparent",
-      wrapperBg: "transparent", // Light mode me wrapper bilkul transparent
+      infoBarBg: "#ffffff",
+      infoBarBorder: "#e4e4e7",
+      wrapperBg: "transparent",
+      // Light mode me black shadow
+      profileShadow: "0 4px 12px rgba(0, 0, 0, 0.12)",
     },
   };
 
@@ -144,7 +148,7 @@ export default function DashboardPage() {
           zIndex: 900,
           width: "100%",
           boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-          backgroundColor: t.wrapperBg, // Transparent in light mode
+          backgroundColor: t.wrapperBg,
         }}
       >
         <header
@@ -294,8 +298,8 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        {/* USER PROFILE / INFO BAR */}
-        <div style={{ padding: "8px 12px", backgroundColor: "transparent" }}>
+        {/* USER PROFILE / INFO BAR (Floating Card with Custom Shadow) */}
+        <div style={{ padding: "10px 16px", backgroundColor: "transparent" }}>
           <section
             style={{
               backgroundColor: t.infoBarBg,
@@ -304,8 +308,9 @@ export default function DashboardPage() {
               display: "flex",
               alignItems: "center",
               gap: "16px",
-              borderRadius: currentTheme === "dark" ? "10px" : "0px",
-              border: currentTheme === "dark" ? `1px solid ${t.infoBarBorder}` : "none",
+              borderRadius: "12px",
+              border: `1px solid ${t.infoBarBorder}`,
+              boxShadow: t.profileShadow,
             }}
           >
             <div
@@ -313,12 +318,12 @@ export default function DashboardPage() {
                 width: "48px",
                 height: "48px",
                 borderRadius: "6px",
-                backgroundColor: currentTheme === "dark" ? "#101f19" : "transparent",
+                backgroundColor: currentTheme === "dark" ? "#101f19" : "#f4f4f5",
                 overflow: "hidden",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                border: currentTheme === "dark" ? `1px solid ${t.infoBarBorder}` : "none",
+                border: `1px solid ${t.infoBarBorder}`,
                 flexShrink: 0,
               }}
             >
@@ -350,7 +355,7 @@ export default function DashboardPage() {
       <main
         style={{
           padding: "20px",
-          paddingTop: "170px",
+          paddingTop: "180px",
           maxWidth: "800px",
           margin: "0 auto",
         }}
