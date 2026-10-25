@@ -21,8 +21,7 @@ interface ActionButton {
 export default function DashboardPage() {
   const router = useRouter();
 
-  const [headerData, setHeaderData] = useState<DashboardHeaderData>({
-    accountCode: "R777 - TT",
+const [headerData] = useState<DashboardHeaderData>({    accountCode: "R777 - TT",
     balance: 41300,
     tag: "TTTT",
     regId: "alii560",
