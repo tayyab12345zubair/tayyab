@@ -51,17 +51,6 @@ export default function DashboardPage() {
     setIsSidebarOpen(false);
   }
 
-  // Disable right-click globally across the app
-  useEffect(() => {
-    const handleContextMenu = (e: MouseEvent) => {
-      e.preventDefault();
-    };
-    window.addEventListener("contextmenu", handleContextMenu);
-    return () => {
-      window.removeEventListener("contextmenu", handleContextMenu);
-    };
-  }, []);
-
   useEffect(() => {
     const updateDateTime = () => {
       const now = new Date();

@@ -1,24 +1,23 @@
-import type { Metadata, Viewport } from "next";
+"use client";
+
+import { useEffect } from "react";
 import "./globals.css";
-
-export const metadata: Metadata = {
-  title: "Admin Portal",
-  description: "High-fidelity Admin Dashboard",
-};
-
-// Yeh mobile screen resolution aur iPhone zoom issue ko fix karega
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-};
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  useEffect(() => {
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+    };
+    window.addEventListener("contextmenu", handleContextMenu);
+    return () => {
+      window.removeEventListener("contextmenu", handleContextMenu);
+    };
+  }, []);
+
   return (
     <html lang="en">
       <body style={{ margin: 0, padding: 0, overflowX: "hidden" }}>
