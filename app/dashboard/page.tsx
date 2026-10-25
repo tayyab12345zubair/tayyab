@@ -82,7 +82,7 @@ export default function DashboardPage() {
       sidebarBg: "#ffffff",
       sidebarText: "#000000",
       infoBarBg: "#ffffff",
-      infoBarBorder: "#e4e4e7",
+      infoBarBorder: "#1b3a2f",
     },
   };
 
