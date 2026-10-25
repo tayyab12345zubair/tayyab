@@ -35,22 +35,19 @@ export default function DashboardPage() {
     time: "",
   });
 
-  // Sidebar & Theme Modal States ('dark' or 'light')
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
   const [currentTheme, setCurrentTheme] = useState<"dark" | "light">("dark");
 
-  // Working Logout Function to /login
   function handleLogout() {
     router.push("/login");
   }
 
-  // Real-time live clock & date update
   useEffect(() => {
     const updateDateTime = () => {
       const now = new Date();
-      const dateStr = now.toLocaleDateString("en-GB"); // DD/MM/YYYY
-      const timeStr = now.toLocaleTimeString("en-GB", { hour12: false }); // HH:MM:SS
+      const dateStr = now.toLocaleDateString("en-GB");
+      const timeStr = now.toLocaleTimeString("en-GB", { hour12: false });
       setCurrentDateTime({ date: dateStr, time: timeStr });
     };
 
@@ -59,7 +56,6 @@ export default function DashboardPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Theme configuration
   const themeStyles = {
     dark: {
       bg: "#121212",
@@ -87,9 +83,8 @@ export default function DashboardPage() {
 
   const t = themeStyles[currentTheme];
 
-  // Action Buttons (A, B, C, D etc.) arranged 2 in a row with proper TypeScript Typing
   const actionButtons: ActionButton[] = [
-    { name: "Button A1" },
+    { name: "Button A" },
     { name: "Button B" },
     { name: "Button C" },
     { name: "Button D" },
@@ -132,24 +127,22 @@ export default function DashboardPage() {
         color: t.textPrimary,
         fontFamily: "sans-serif",
         position: "relative",
-        overflowY: "auto",
-        WebkitOverflowScrolling: "touch",
       }}
     >
       {/* ================= FIXED / LOCKED HEADER WRAPPER ================= */}
       <div
         style={{
-          position: "sticky",
+          position: "fixed",
           top: 0,
+          left: 0,
           zIndex: 900,
           width: "100%",
           boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
         }}
       >
-        {/* TOP HEADER BAR (Strictly Emerald Green Stock Color) */}
         <header
           style={{
-            backgroundColor: "#1b3a2f", // Permanent Emerald Stock Green
+            backgroundColor: "#1b3a2f",
             color: "#e2e8f0",
             display: "flex",
             alignItems: "center",
@@ -160,7 +153,6 @@ export default function DashboardPage() {
             fontWeight: "600",
           }}
         >
-          {/* Left Section: 3-Dot / Menu Icon & Account Details */}
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <button
               onClick={() => setIsSidebarOpen(true)}
@@ -187,7 +179,6 @@ export default function DashboardPage() {
               </svg>
             </button>
 
-            {/* Green Lock Icon */}
             <div
               style={{
                 backgroundColor: "#10b981",
@@ -221,7 +212,6 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Center Tag / Badge */}
           <div
             style={{
               background: "transparent",
@@ -238,7 +228,6 @@ export default function DashboardPage() {
             <span>{headerData.tag}</span>
           </div>
 
-          {/* Right Section: Live Date, Time & Logout Button */}
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <div style={{ textAlign: "right", lineHeight: "1.3" }}>
               <div
@@ -298,7 +287,6 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        {/* USER PROFILE / INFO BAR */}
         <section
           style={{
             backgroundColor: t.infoBarBg,
@@ -347,10 +335,11 @@ export default function DashboardPage() {
         </section>
       </div>
 
-      {/* ================= SCROLLABLE DASHBOARD ACTION BUTTONS (2 in a row) ================= */}
+      {/* ================= SCROLLABLE DASHBOARD ACTION BUTTONS ================= */}
       <main
         style={{
           padding: "20px",
+          paddingTop: "150px", // Header ke neeche content chupne se bachane ke liye top spacing
           maxWidth: "800px",
           margin: "0 auto",
         }}
@@ -359,7 +348,6 @@ export default function DashboardPage() {
           Quick Actions
         </h2>
 
-        {/* Grid layout ensuring 2 buttons per line */}
         <div
           style={{
             display: "grid",
