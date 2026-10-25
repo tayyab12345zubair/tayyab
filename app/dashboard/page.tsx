@@ -72,7 +72,6 @@ export default function DashboardPage() {
       infoBarBg: "#29292b",
       infoBarBorder: "#1b3a2f",
       wrapperBg: "#121212",
-      // Dark mode me white shadow
       profileShadow: "0 4px 16px rgba(255, 255, 255, 0.08)",
     },
     light: {
@@ -86,7 +85,6 @@ export default function DashboardPage() {
       infoBarBg: "#ffffff",
       infoBarBorder: "#e4e4e7",
       wrapperBg: "transparent",
-      // Light mode me black shadow
       profileShadow: "0 4px 12px rgba(0, 0, 0, 0.12)",
     },
   };
@@ -147,7 +145,7 @@ export default function DashboardPage() {
           left: 0,
           zIndex: 900,
           width: "100%",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+          // Background shadow removed completely so no background box appears behind the profile card
           backgroundColor: t.wrapperBg,
         }}
       >
@@ -298,7 +296,7 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        {/* USER PROFILE / INFO BAR (Floating Card with Custom Shadow) */}
+        {/* USER PROFILE / INFO BAR (Floating Card with clean shadow) */}
         <div style={{ padding: "10px 16px", backgroundColor: "transparent" }}>
           <section
             style={{
