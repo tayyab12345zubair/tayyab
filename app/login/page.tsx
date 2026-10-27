@@ -1,184 +1,188 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { apiRequest } from "@/services/apiService";
+import { authStore } from "@/store/authStore";
+import { wsService } from "@/services/websocketService";
+import { LoginModel, LoginResult } from "@/types/auth";
 
 export default function LoginPage() {
   const router = useRouter();
-
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  function handleLogin(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError("");
+  async function handleLoginSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setErrorMsg(null);
+    setIsLoading(true);
 
-    if (!username.trim() || !password) {
-      setError("Please enter your username and password.");
-      return;
+    try {
+      const payload: LoginModel = {
+        email,
+        password,
+        rememberMe: false,
+      };
+
+      const result = await apiRequest<LoginResult>("/api/Login/LoginNewDdts", "POST", payload);
+
+      if (result && result.successful) {
+        authStore.setUserData(
+          result.ID,
+          result.UnID,
+          result.token
+        );
+
+        wsService.connect();
+        router.push("/dashboard");
+      } else {
+        setErrorMsg(result?.error || "Login failed. Please check your credentials.");
+      }
+    } catch (err) {
+      setErrorMsg("An error occurred during login. Please try again.");
+      console.error(err);
+    } finally {
+      setIsLoading(false);
     }
-
-    router.push("/dashboard");
   }
 
   return (
-    <main
+    <div
       style={{
-        backgroundColor: "#121212",
-        minHeight: "100vh",
         width: "100%",
+        minHeight: "100vh",
+        backgroundColor: "#121212",
+        color: "#ffffff",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        padding: "20px",
-        boxSizing: "border-box",
         fontFamily: "sans-serif",
+        padding: "20px",
       }}
     >
-      <div
+      <form
+        onSubmit={handleLoginSubmit}
         style={{
+          width: "100%",
+          maxWidth: "320px",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          width: "100%",
-          maxWidth: "320px",
+          gap: "16px",
         }}
       >
-        {/* Glowing Logo */}
-        <div
-          style={{
-            marginBottom: "30px",
-            filter: "drop-shadow(0 0 15px rgba(212, 175, 55, 0.3))",
-            textAlign: "center",
-          }}
-        >
+        {/* Logo */}
+        <div style={{ marginBottom: "10px" }}>
           <Image
             src="/Logo.png"
             alt="Logo"
-            width={210}
-            height={230}
-            priority
+            width={160}
+            height={160}
             style={{ objectFit: "contain" }}
           />
         </div>
 
-        {/* Login Form */}
-        <form
-          onSubmit={handleLogin}
-          style={{
-            width: "100%",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center", // Form ke andar saari cheezein center align karne ke liye
-            gap: "12px",
-          }}
-        >
-          {/* Username Input */}
-          <div style={{ width: "100%" }}>
-            <input
-              type="text"
-              placeholder="Username"
-              aria-label="Username"
-              autoComplete="username"
-              value={username}
-              onChange={(event) => setUsername(event.target.value)}
-              required
-              style={{
-                width: "100%",
-                padding: "12px 14px",
-                fontSize: "14px",
-                borderRadius: "6px",
-                border: "1px solid #2a2a2a",
-                backgroundColor: "#1e1e1e",
-                color: "#ffffff",
-                outline: "none",
-                boxSizing: "border-box",
-              }}
-            />
-          </div>
-
-          {/* Password Input */}
+        {errorMsg && (
           <div
             style={{
               width: "100%",
-              position: "relative",
-              display: "flex",
-              alignItems: "center",
+              padding: "8px",
+              backgroundColor: "rgba(239, 68, 68, 0.15)",
+              border: "1px solid rgba(239, 68, 68, 0.3)",
+              color: "#ef4444",
+              borderRadius: "6px",
+              fontSize: "12px",
+              textAlign: "center",
             }}
           >
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Password"
-              aria-label="Password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              required
-              style={{
-                width: "100%",
-                padding: "12px 55px 12px 14px",
-                fontSize: "14px",
-                borderRadius: "6px",
-                border: "1px solid #2a2a2a",
-                backgroundColor: "#1e1e1e",
-                color: "#ffffff",
-                outline: "none",
-                boxSizing: "border-box",
-              }}
-            />
-
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              style={{
-                position: "absolute",
-                right: "14px",
-                background: "transparent",
-                border: "none",
-                fontSize: "13px",
-                color: "#888888",
-                cursor: "pointer",
-                fontWeight: "500",
-              }}
-            >
-              {showPassword ? "Hide" : "Show"}
-            </button>
+            {errorMsg}
           </div>
+        )}
 
-          {error && (
-            <p
-              role="alert"
-              style={{ color: "#ef4444", fontSize: "12px", margin: "4px 0", textAlign: "center" }}
-            >
-              {error}
-            </p>
-          )}
-
-          {/* Centered Login Button (Slightly narrower and perfectly centered) */}
-          <button
-            type="submit"
+        {/* Username Input */}
+        <div style={{ width: "100%" }}>
+          <input
+            type="text"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
             style={{
-              width: "45%", // Button ko chota aur center karne ke liye width kam ki hai
-              padding: "10px 16px",
+              width: "100%",
+              padding: "12px 14px",
               borderRadius: "8px",
-              backgroundColor: "#5856d6",
+              border: "1px solid #2a2a2a",
+              backgroundColor: "#1a1a1a",
               color: "#ffffff",
-              border: "none",
               fontSize: "14px",
-              fontWeight: "600",
+              outline: "none",
+            }}
+            placeholder="Username"
+          />
+        </div>
+
+        {/* Password Input with Show/Hide */}
+        <div style={{ width: "100%", position: "relative", display: "flex", alignItems: "center" }}>
+          <input
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            style={{
+              width: "100%",
+              padding: "12px 50px 12px 14px",
+              borderRadius: "8px",
+              border: "1px solid #2a2a2a",
+              backgroundColor: "#1a1a1a",
+              color: "#ffffff",
+              fontSize: "14px",
+              outline: "none",
+            }}
+            placeholder="Password"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            style={{
+              position: "absolute",
+              right: "14px",
+              background: "none",
+              border: "none",
+              color: "#888888",
               cursor: "pointer",
-              marginTop: "8px",
-              transition: "background-color 0.2s ease",
+              fontSize: "13px",
+              fontWeight: "500",
             }}
           >
-            Login
+            {showPassword ? "Hide" : "Show"}
           </button>
-        </form>
-      </div>
-    </main>
+        </div>
+
+        {/* Login Button */}
+        <button
+          type="submit"
+          disabled={isLoading}
+          style={{
+            width: "100%",
+            padding: "12px",
+            backgroundColor: "#5856d6",
+            color: "#ffffff",
+            border: "none",
+            borderRadius: "8px",
+            fontWeight: "bold",
+            fontSize: "14px",
+            cursor: isLoading ? "not-allowed" : "pointer",
+            transition: "background 0.2s ease",
+            marginTop: "4px",
+          }}
+        >
+          {isLoading ? "Logging in..." : "Login"}
+        </button>
+      </form>
+    </div>
   );
 }
