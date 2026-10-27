@@ -5,8 +5,11 @@ class WebSocketService {
   private connection: signalR.HubConnection | null = null;
 
   connect() {
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-    if (!baseUrl) return;
+    const rawBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+    if (!rawBaseUrl) return;
+
+    // Remove trailing slash if present to avoid double slashes
+    const baseUrl = rawBaseUrl.replace(/\/$/, "");
 
     this.connection = new signalR.HubConnectionBuilder()
       .withUrl(`${baseUrl}/RefreshHub`)
@@ -29,7 +32,6 @@ class WebSocketService {
   private sendLoginSignal() {
     const userId = authStore.getUserId();
     if (this.connection && userId !== null) {
-      // User ID ko as a string "LogIn" endpoint/method pe send karna
       this.connection.invoke("LogIn", userId.toString())
         .catch(err => console.error("Error invoking LogIn on hub: ", err));
     }
