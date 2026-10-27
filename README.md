@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Secure Next.js Dashboard & Login Application
 
-## Getting Started
+A secure, high-performance, and responsive Next.js (App Router) dashboard and authentication application built with TypeScript, featuring real-time SignalR web socket integration, strict client-side security measures, and automated API error handling.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🚀 Main Features & File Directory
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 1. Authentication & API Integration
+- **Features**: Secure communication with the backend API (`/api/Login/LoginNewDdts`), JSON content formatting, Bearer token handling, case-insensitive response parsing, and automatic `401 Unauthorized` handling that clears user data and redirects back to the login page.
+- **Key Files**:
+  - `services/apiService.ts` - Handles HTTP requests, authorization headers, and status code interceptions.
+  - `store/authStore.ts` - In-memory store managing secure user-scoped parameters (`ID`, `Mbm`/`UnID`, and `Token`).
+  - `types/auth.ts` - TypeScript interfaces for login payloads and server responses.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 2. Real-Time WebSocket Connectivity (SignalR)
+- **Features**: Establishes a live connection to the backend hub (`/RefreshHub`), supports automatic reconnections, and emits user login tracking signals (`LogIn`) using the user's ID.
+- **Key Files**:
+  - `services/websocketService.ts` - Manages SignalR connection lifecycle and event listeners.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. Theme Management (Dark / Light Mode)
+- **Features**: Dynamic theme toggling supporting smooth user interface adjustments between dark and light color modes, controlled directly via the dashboard layout.
+- **Key Files**:
+  - `app/dashboard/page.tsx` - Contains the active state configuration for `currentTheme` and the layout styling object.
 
-## Learn More
+### 4. Global Security & Protection
+- **Features**: Disables the default browser `contextmenu` (right-click) globally across the application to enhance content security.
+- **Key Files**:
+  - `app/layout.tsx` - Implements the global event listeners and layout wrappers.
 
-To learn more about Next.js, take a look at the following resources:
+### 5. Custom Clean Login Interface
+- **Features**: A minimalist, high-impact login screen featuring a centered logo, username input field, password input field with a toggleable **Show/Hide** visibility button, and a clean action button.
+- **Key Files**:
+  - `app/login/page.tsx` - Custom login UI component and form state handler.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🛠️ Tech Stack
 
-## Deploy on Vercel
+- **Framework**: Next.js 14+ (App Router)
+- **Language**: TypeScript / JavaScript
+- **Real-Time Communication**: `@microsoft/signalr`
+- **Styling**: Inline Styles / Responsive Design Approach
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📦 Getting Started
+
+### Prerequisites
+Make sure you have **Node.js** (v18 or higher) installed on your system.
+
+### Installation & Setup
+
+1. Clone the repository and navigate to the project directory:
+   ```bash
+   git clone [https://github.com/MFarooqTahir/XTNJP.git](https://github.com/MFarooqTahir/XTNJP.git)
+   cd XTNJP
