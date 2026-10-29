@@ -1,23 +1,108 @@
-# Secure Next.js Client-Admin Dashboard Application
+Project Description
 
-A secure, high-performance, and responsive Next.js (App Router) dashboard and authentication system built with TypeScript, featuring real-time SignalR WebSocket integration, strict client-side security measures, and structured API error handling.
+The Client Admin Dashboard is a enterprise-grade Next.js application designed to connect with an Azure-hosted backend API and SignalR Hub (/RefreshHub). The core focus is absolute security, strict route interception, real-time sync, and a clean user experience with toggleable dark/light themes.
 
----
+2. Status Summary
 
-## 📂 Project Architecture & File Directory
+✅ What Is Done
 
-```text
-client-admin-app/
-├── app/                  # Next.js App Router pages & layouts
-│   ├── layout.tsx        # Global layout, security listeners, & contextmenu block
-│   ├── page.tsx          # Root redirect handler (directs '/' to '/login')
-│   ├── login/            # Login view components
-│   └── dashboard/        # Main dashboard views & theme toggles
-├── services/             # Core business logic, API requests, & WebSockets
-│   ├── apiService.ts     # Centralized HTTP request handler & 401 interceptor
-│   └── websocketService.ts # SignalR connection manager & login signal emitter
-├── store/                # In-memory state management
-│   └── authStore.ts      # User session parameters store (ID, Token, etc.)
-└── types/                # TypeScript interface definitions
-    └── auth.ts           # Authentication payloads & response interfaces
-🛠️ Detailed Component & Function Breakdown1. Authentication & API Layer (services/apiService.ts)Yeh file saari backend HTTP communication ko handle karti hai. Ismein centralized request wrapper (apiRequest) mojood hai.apiRequest<T>(endpoint, method, body):Automatically Content-Type: application/json headers set karta hai.Agar user logged-in hai (token mojood hai), toh Authorization: Bearer <token> header attach karta hai.   401 Unauthorized Interception: Agar server 401 status code return karta hai, toh yeh foran authStore.clear() call karke user ka session wipe karta hai aur window.location.href = "/login" ke zariye user ko login page par redirect kar deta hai.   Case-insensitive response parsing provide karta hai.2. In-Memory Session Store (store/authStore.ts)Purpose: User session data ko securely memory mein store karta hai.Stored Parameters: User ID, Token, aur associated metadata (Mbm/UnID).3. Real-Time WebSockets (services/websocketService.ts)SignalR ke zariye backend se real-time connection maintain karta hai.connect():${NEXT_PUBLIC_API_BASE_URL}/RefreshHub par connection establish karta hai.   Automatic reconnection rules (withAutomaticReconnect) configure kiye gaye hain.sendLoginSignal():Connection successful hone par server ke LogIn hub method par active user ID invoke karta hai.   4. Global Security & Routing (app/)app/page.tsx:Root route (/) par aate hi user ko automatically /login par redirect kar deta hai.app/layout.tsx:Global layout wrapper jo puri application par browser ka default right-click (contextmenu) disable karta hai taake content secure rahe.⚙️ Environment Variables Setup (.env.local)Project ke root mein .env.local file banayein aur yeh variable configure karein:Code snippetNEXT_PUBLIC_API_BASE_URL=[https://webapistaging-bxbefmgmbgh0fyg3.uaenorth-01.azurewebsites.net](https://webapistaging-bxbefmgmbgh0fyg3.uaenor
+Authentication Store (store/authStore.ts): In-memory storage for active tokens, user IDs, and metadata.
+
+Centralized API Wrapper (services/apiService.ts): Generic HTTP request handler with automatic Bearer header injection, case-insensitive response handling, and 401 Unauthorized interception.
+
+Real-time SignalR Integration (services/websocketService.ts): Auto-reconnecting WebSocket connection calling LogIn hub method upon connection.
+
+Route Security (middleware.ts & app/page.tsx): Root auto-redirect to /login and server-side middleware route guards blocking unauthorized visits to /dashboard.
+
+Global Context Security (app/layout.tsx): Right-click (contextmenu) disabled across client pages.
+
+⚠️ Current Technical Debt & Issues Identified
+
+Theme System Disconnect:
+
+Visual components currently use inline hex styles (e.g., backgroundColor: "#121212"), bypassing CSS variables (var(--bg), var(--surface)).
+
+globals.css contains unused custom classes while @import "tailwindcss"; is omitted.
+
+ThemeToggle.tsx is not rendered inside any page layout or route.
+
+Flash of Unstyled Content (FOUC): Theme preference is currently read client-side (localStorage) instead of via cookies during SSR paint.
+
+ESLint Violations:
+
+ThemeToggle.tsx triggers react-hooks/set-state-in-effect.
+
+apiService.ts contains any usage for payload body parameters.
+
+📋 What Needs To Be Done (Immediate Backlog)
+
+Priority 1: Theme & CSS Wiring (Refactoring)
+
+Option A (Preferred): Remove Tailwind CSS overhead if unused, remove turbopack.rules block from next.config.ts, and replace inline hex styles with existing globals.css variables/classes.
+
+Option B: Fully commit to Tailwind by injecting @import "tailwindcss"; into globals.css, defining @theme tokens, and replacing custom classes.
+
+Cookie-Based Theme Persistence: Transition theme state management from localStorage to cookies so data-theme can be set on the <html> root before server paint.
+
+Render ThemeToggle: Import and mount ThemeToggle.tsx inside the primary header/layout. Fix the react-hooks/set-state-in-effect ESLint warning.
+
+Priority 2: API & Cookie Synchronization
+
+Ensure login responses save token to browser cookies in addition to authStore so middleware.ts can read tokens server-side.
+
+Clean up remaining linter warnings across services/.
+
+⚙️ How It Works (System Mechanics)
+
+1. Authentication & Route Guard Flow
+
+[User Request] ──> [Next.js Middleware] ──> Token in Cookie?
+                         │                           │
+                         ├── NO ──> Redirect to /login
+                         └── YES ──> Render Page
+
+
+2. API Communication & 401 Interception
+
+[apiService.ts] ──> fetch(URL, Bearer Token)
+                          │
+                          ├── 200 OK ──> Parse & Return Data
+                          └── 401 Unauthorized ──> Clear Auth Store ──> Redirect to /login
+
+
+3. SignalR WebSockets
+
+[websocketService.ts] ──> `${NEXT_PUBLIC_API_BASE_URL}/RefreshHub`
+                               │
+                               └── On Connect ──> Invoke "LogIn" with User ID
+
+
+📐 Project Rules & Conventions
+
+To maintain code consistency across multiple agents and developers, adhere strictly to the following rules:
+
+Branching & Git Workflow:
+
+NO direct commits to main!
+
+Every feature or fix must be executed in a dedicated branch (e.g., feature/theme-wiring, fix/eslint-errors).
+
+Every branch must be merged via a structured Pull Request (PR) written in English.
+
+Pull Request (PR) Requirements:
+
+Include a clear title and description outlining What was changed, Why, and Files touched.
+
+List testing steps for reviewers.
+
+Styling & Theme Rules:
+
+No hardcoded literal hex colors in JSX/TSX inline styles.
+
+Use CSS variables (var(--...)) or utility tokens.
+
+Code Quality & Type Safety:
+
+Avoid any types; prefer strict interfaces (types/) or unknown.
+
+Ensure npm run lint passes cleanly before requesting PR review.

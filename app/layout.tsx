@@ -1,26 +1,23 @@
-"use client";
-
-import { useEffect } from "react";
+import type { Metadata } from "react";
+import { cookies } from "next/headers";
 import "./globals.css";
 
-export default function RootLayout({
+export const metadata: Metadata = {
+  title: "Client Admin Dashboard",
+  description: "Secure Next.js dashboard with real-time updates",
+};
+
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  useEffect(() => {
-    const handleContextMenu = (e: MouseEvent) => {
-      e.preventDefault();
-    };
-    window.addEventListener("contextmenu", handleContextMenu);
-    return () => {
-      window.removeEventListener("contextmenu", handleContextMenu);
-    };
-  }, []);
+  const cookieStore = await cookies();
+  const theme = cookieStore.get("theme")?.value || "dark";
 
   return (
-    <html lang="en">
-      <body style={{ margin: 0, padding: 0, overflowX: "hidden" }}>
+    <html lang="en" data-theme={theme}>
+      <body suppressHydrationWarning>
         {children}
       </body>
     </html>

@@ -1,37 +1,38 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
 
 export default function ThemeToggle() {
-  const [dark, setDark] = useState(false);
+  const [theme, setTheme] = useState<string>("dark");
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem("app-theme");
-    const isDark = savedTheme === "dark";
-
-    setDark(isDark);
-    document.documentElement.dataset.theme =
-      isDark ? "dark" : "light";
+    const currentTheme = document.documentElement.getAttribute("data-theme") || "dark";
+    setTheme(currentTheme);
   }, []);
 
-  function toggleTheme() {
-    const nextTheme = dark ? "light" : "dark";
-
-    setDark(nextTheme === "dark");
-    document.documentElement.dataset.theme = nextTheme;
-    localStorage.setItem("app-theme", nextTheme);
-  }
+  const toggleTheme = () => {
+    const newTheme = theme === "dark" ? "light" : "dark";
+    setTheme(newTheme);
+    document.documentElement.setAttribute("data-theme", newTheme);
+    // Persist theme in cookie for 1 year so server can read it on next request
+    document.cookie = `theme=${newTheme}; path=/; max-age=31536000; SameSite=Lax`;
+  };
 
   return (
-    <button
-      type="button"
+    <button 
+      onClick={toggleTheme} 
       className="theme-toggle"
-      onClick={toggleTheme}
-      aria-label="Toggle light and dark theme"
+      aria-label="Toggle Theme"
+      style={{
+        padding: "8px 12px",
+        borderRadius: "6px",
+        cursor: "pointer",
+        background: "var(--surface)",
+        color: "var(--text)",
+        border: "1px solid var(--border)"
+      }}
     >
-      {dark ? "☀ Light Mode" : "☾ Dark Mode"}
+      {theme === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode"}
     </button>
   );
 }
-
