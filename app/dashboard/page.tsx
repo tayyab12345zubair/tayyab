@@ -1,223 +1,485 @@
-import React, { useState } from 'react';
+"use client";
 
-export default function Dashboard({ currentUser, onLogout }) {
-  const [activePage, setActivePage] = useState('dashboard');
-  const [searchQuery, setSearchQuery] = useState('');
-  
-  // Sample clients list
-  const [clientsList] = useState([
-    { id: 'CL-101', name: 'Czone Technologies', code: 'CZ-001', acFileRef: 'AC_CZONE_01', status: 'Linked' },
-    { id: 'CL-102', name: 'Acme Global Tech', code: 'AC-002', acFileRef: 'AC_ACME_02', status: 'Linked' },
-    { id: 'CL-103', name: 'Global Logistics', code: 'GL-003', acFileRef: 'AC_GL_03', status: 'Pending' },
-  ]);
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { authStore } from "@/store/authStore";
+import { CDRelation } from "@/services/apiService";
 
-  // Summary cards data
-  const summaryCards = [
-    { title: 'Sale Overview', value: 'PKR 1,250,000', count: '48 Invoices', key: 'sale', color: '#2563eb', bg: '#eff6ff' },
-    { title: 'Sales Return', value: 'PKR 45,000', count: '3 Credit Notes', key: 'return', color: '#dc2626', bg: '#fef2f2' },
-    { title: 'Quotations / Estimate', value: 'PKR 680,000', count: '12 Active', key: 'estimate', color: '#d97706', bg: '#fffbeb' },
-    { title: 'Purchases', value: 'PKR 890,000', count: '18 POs', key: 'purchase', color: '#059669', bg: '#ecfdf5' },
-    { title: 'General Ledger', value: 'PKR 3,120,000', count: 'Acfile Live', key: 'ledger', color: '#7c3aed', bg: '#f5f3ff' },
-    { title: 'Trial Balance', value: 'Balanced (0.00 Diff)', count: 'Trans / Invdet', key: 'trial', color: '#0891b2', bg: '#ecfeff' },
+interface ActionButton {
+  name: string;
+  desc?: string;
+}
+
+export default function DashboardPage() {
+  const router = useRouter();
+
+  const [companyData, setCompanyData] = useState<CDRelation | null>(null);
+  const [currentDateTime, setCurrentDateTime] = useState({
+    date: "",
+    time: "",
+  });
+
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [currentTheme, setCurrentTheme] = useState<"dark" | "light">("dark");
+  const [selectedAction, setSelectedAction] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Get stored company data from authStore
+    const activeCompany = authStore.getSelectedCompany();
+    if (activeCompany) {
+      setCompanyData(activeCompany);
+    }
+
+    const updateDateTime = () => {
+      const now = new Date();
+      const dateStr = now.toLocaleDateString("en-GB");
+      const timeStr = now.toLocaleTimeString("en-GB", { hour12: false });
+      setCurrentDateTime({ date: dateStr, time: timeStr });
+    };
+
+    updateDateTime();
+    const interval = setInterval(updateDateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  function handleLogout(e: React.MouseEvent) {
+    e.preventDefault();
+    authStore.clearSession();
+    router.push("/login");
+  }
+
+  function toggleTheme() {
+    setCurrentTheme((prev) => (prev === "dark" ? "light" : "dark"));
+    setIsSidebarOpen(false);
+  }
+
+  const themeStyles = {
+    dark: {
+      bg: "#121212",
+      textPrimary: "#ffffff",
+      textSecondary: "#888888",
+      cardBg: "#1a1a1a",
+      cardBorder: "#2a2a2a",
+      sidebarBg: "#152e24",
+      sidebarText: "#ffffff",
+      infoBarBg: "#29292b",
+      infoBarBorder: "#19191a",
+      wrapperBg: "#121212",
+      profileShadow: "0 4px 16px rgba(255, 255, 255, 0.08)",
+    },
+    light: {
+      bg: "#f4f4f5",
+      textPrimary: "#000000",
+      textSecondary: "#52525b",
+      cardBg: "#ffffff",
+      cardBorder: "#e4e4e7",
+      sidebarBg: "#ffffff",
+      sidebarText: "#000000",
+      infoBarBg: "#ffffff",
+      infoBarBorder: "#e4e4e7",
+      wrapperBg: "transparent",
+      profileShadow: "0 4px 12px rgba(0, 0, 0, 0.12)",
+    },
+  };
+
+  const t = themeStyles[currentTheme];
+
+  const actionButtons: ActionButton[] = [
+    { name: "Button A" },
+    { name: "Button B" },
+    { name: "Button C" },
+    { name: "Button D" },
+    { name: "Button E" },
+    { name: "Button F" },
+    { name: "Button G" },
+    { name: "Button H" },
+    { name: "Button I" },
+    { name: "Button J" },
+    { name: "Button K" },
+    { name: "Button L" },
+    { name: "Button M" },
+    { name: "Button N" },
+    { name: "Button O" },
+    { name: "Button P" },
+    { name: "Button Q" },
+    { name: "Button R" },
+    { name: "Button S" },
+    { name: "Button T" },
+    { name: "Button U" },
+    { name: "Button V" },
+    { name: "Button W" },
+    { name: "Button X" },
+    { name: "Button Y" },
+    { name: "Button Z" },
+    { name: "Button 1" },
+    { name: "Button 2" },
+    { name: "Button 3" },
+    { name: "Button 4" },
+    { name: "Button 5" },
+    { name: "Button 6" },
   ];
 
-  // Check if any client matches the search query
-  const isClientSearched = searchQuery.trim().length > 0;
-  const filteredClients = clientsList.filter(c => 
-    c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    c.id.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f8fafc', fontFamily: 'sans-serif', color: '#0f172a' }}>
-      
-      {/* SIDEBAR NAVIGATION */}
-      <aside style={{ width: '250px', backgroundColor: '#0f172a', color: '#f8fafc', padding: '24px 16px', display: 'flex', flexDirection: 'column', gap: '8px', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingBottom: '24px', borderBottom: '1px solid #1e293b', marginBottom: '16px' }}>
-          <div style={{ width: '36px', height: '36px', backgroundColor: '#2563eb', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: '#fff' }}>NL</div>
-          <div>
-            <h2 style={{ fontSize: '16px', fontWeight: '700', margin: 0 }}>NexusLedger</h2>
-            <span style={{ fontSize: '10px', color: '#94a3b8' }}>ERP Sync Dashboard</span>
-          </div>
-        </div>
-
-        {[
-          { name: 'Dashboard Home', key: 'dashboard', icon: '📊' },
-          { name: 'Sales', key: 'sale', icon: '📈' },
-          { name: 'Returns', key: 'return', icon: '🔄' },
-          { name: 'Estimates', key: 'estimate', icon: '📝' },
-          { name: 'Purchases', key: 'purchase', icon: '🛍️' },
-          { name: 'Ledger Accounts', key: 'ledger', icon: '📖' },
-          { name: 'Trial Balance', key: 'trial', icon: '⚖️' },
-          { name: 'Clients Directory', key: 'clients', icon: '👥' },
-        ].map((item) => (
-          <button
-            key={item.key}
-            onClick={() => setActivePage(item.key)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              padding: '12px 16px',
-              borderRadius: '8px',
-              border: 'none',
-              backgroundColor: activePage === item.key ? '#2563eb' : 'transparent',
-              color: activePage === item.key ? '#ffffff' : '#94a3b8',
-              fontWeight: activePage === item.key ? '600' : '400',
-              cursor: 'pointer',
-              textAlign: 'left',
-              fontSize: '13px',
-            }}
-          >
-            <span>{item.icon}</span>
-            <span>{item.name}</span>
-          </button>
-        ))}
-      </aside>
-
-      {/* MAIN CONTENT AREA */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowX: 'hidden' }}>
-        
-        {/* TOP NAVBAR WITH CLIENT SEARCH */}
-        <header style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', padding: '16px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          
-          <div style={{ position: 'relative', width: '340px' }}>
-            <input
-              type="text"
-              placeholder="🔍 Search by Client Name or Account ID..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px 14px',
-                borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                fontSize: '13px',
-                outline: 'none',
-                backgroundColor: '#f8fafc'
+    <div
+      style={{
+        width: "100%",
+        minHeight: "100vh",
+        backgroundColor: t.bg,
+        color: t.textPrimary,
+        fontFamily: "sans-serif",
+        position: "relative",
+        boxSizing: "border-box",
+        overflowX: "hidden",
+      }}
+    >
+      {/* ================= FIXED HEADER ================= */}
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          zIndex: 900,
+          width: "100%",
+          backgroundColor: t.wrapperBg,
+          boxSizing: "border-box",
+        }}
+      >
+        <header
+          style={{
+            backgroundColor: "#1b3a2f",
+            color: "#e2e8f0",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "8px 12px",
+            borderBottom: "1px solid #285444",
+            fontSize: "13px",
+            fontWeight: "600",
+            gap: "8px",
+            boxSizing: "border-box",
+          }}
+        >
+          {/* Left section */}
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                setIsSidebarOpen(true);
               }}
-            />
-          </div>
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: "4px",
+                display: "flex",
+                alignItems: "center",
+              }}
+              aria-label="Open Sidebar"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" strokeWidth="2.5">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+              </svg>
+            </button>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{ textAlign: 'right', borderLeft: '1px solid #e2e8f0', paddingLeft: '16px' }}>
-              <span style={{ display: 'block', fontSize: '13px', fontWeight: '600' }}>{currentUser?.email || 'admin@nexus.com'}</span>
-              <span style={{ fontSize: '10px', fontWeight: '700', color: '#2563eb', textTransform: 'uppercase' }}>{currentUser?.role || 'Super Admin'}</span>
+            <div style={{ backgroundColor: "#10b981", borderRadius: "4px", padding: "3px 5px", display: "flex" }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
             </div>
 
-            <button onClick={onLogout} style={{ padding: '8px 12px', backgroundColor: '#fef2f2', color: '#ef4444', border: '1px solid #fee2e2', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>
-              Logout
+            <div style={{ lineHeight: "1.2" }}>
+              <div style={{ fontSize: "13px", fontWeight: "bold", color: "#f8fafc" }}>
+                {companyData?.rCode || "R777 - TT"}
+              </div>
+              <div style={{ fontSize: "12px", fontWeight: "700", color: "#34d399" }}>
+                City: {companyData?.City || "N/A"}
+              </div>
+            </div>
+          </div>
+
+          {/* Middle Tag */}
+          <div style={{ color: "#fbbf24", fontSize: "12px", fontWeight: "bold", whiteSpace: "nowrap" }}>
+            <span style={{ color: "#ef4444" }}>⚔</span> {companyData?.UName || "TTTT"}
+          </div>
+
+          {/* Right Section */}
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
+            <div style={{ textAlign: "right", lineHeight: "1.2" }}>
+              <div style={{ color: "#ffffff", fontSize: "11px", fontWeight: "bold" }}>
+                {currentDateTime.date || "25/10/2026"}
+              </div>
+              <div style={{ color: "#38bdf8", fontSize: "11px", fontWeight: "bold", fontFamily: "monospace" }}>
+                {currentDateTime.time || "16:04:19"}
+              </div>
+            </div>
+
+            <button
+              onClick={handleLogout}
+              title="Logout"
+              style={{
+                background: "rgba(239, 68, 68, 0.15)",
+                border: "1px solid rgba(239, 68, 68, 0.3)",
+                borderRadius: "6px",
+                cursor: "pointer",
+                padding: "6px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
             </button>
           </div>
         </header>
 
-        {/* VIEW PAGES CONTENT */}
-        <main style={{ padding: '32px', maxWidth: '1400px', width: '100%', boxSizing: 'border-box' }}>
-          
-          {activePage === 'dashboard' && (
-            <div>
-              {/* CONDITIONAL RENDERING: AGAR CLIENT SEARCH NAHI KIYA TOH HIDE RAHEGA */}
-              {!isClientSearched ? (
-                <div style={{ 
-                  backgroundColor: '#ffffff', 
-                  borderRadius: '12px', 
-                  border: '1px solid #e2e8f0', 
-                  padding: '60px 20px', 
-                  textAlign: 'center',
-                  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)'
-                }}>
-                  <div style={{ fontSize: '40px', marginBottom: '12px' }}>🔍</div>
-                  <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a', marginBottom: '6px' }}>No Client Searched</h3>
-                  <p style={{ fontSize: '13px', color: '#64748b', maxWidth: '400px', margin: '0 auto' }}>
-                    Please search for a client name or account ID in the top search bar to view financial records, summary cards, and ERP data.
-                  </p>
+        {/* USER PROFILE / INFO BAR (Dynamic Company Data) */}
+        {selectedAction === null && (
+          <div style={{ padding: "8px 12px", backgroundColor: "transparent", boxSizing: "border-box" }}>
+            <section
+              style={{
+                backgroundColor: t.infoBarBg,
+                color: t.textPrimary,
+                padding: "12px 14px",
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                borderRadius: "12px",
+                border: `1px solid ${t.infoBarBorder}`,
+                boxShadow: t.profileShadow,
+                maxWidth: "800px",
+                margin: "0 auto",
+                boxSizing: "border-box",
+              }}
+            >
+              <div
+                style={{
+                  width: "48px",
+                  height: "48px",
+                  borderRadius: "6px",
+                  backgroundColor: currentTheme === "dark" ? "#101f19" : "#f4f4f5",
+                  overflow: "hidden",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  border: `1px solid ${t.infoBarBorder}`,
+                  flexShrink: 0,
+                }}
+              >
+                <Image
+                  src="/Logo.png"
+                  alt="Account Logo"
+                  width={40}
+                  height={40}
+                  style={{ objectFit: "contain" }}
+                />
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "2px", width: "100%", overflow: "hidden" }}>
+                <div style={{ fontSize: "14px", fontWeight: "bold", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  Party Name: <span>{companyData?.PName || "Loading..."}</span>
                 </div>
-              ) : (
-                /* JAB CLIENT SEARCH HOJAYEGA TOH SAARA DATA SHOW HOGA */
-                <div>
-                  <div style={{ marginBottom: '24px' }}>
-                    <h2 style={{ fontSize: '20px', fontWeight: '700', margin: '0 0 6px 0' }}>
-                      ERP Financial & Inventory Overview <span style={{ fontSize: '14px', color: '#2563eb', fontWeight: 'normal' }}>(Filtered for: "{searchQuery}")</span>
-                    </h2>
-                    <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>Live metrics synced from Acfile, Inventory, Invdet, Invsumm, and Trans files.</p>
-                  </div>
-
-                  {/* 6 SUMMARY CARDS GRID */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '32px' }}>
-                    {summaryCards.map((card) => (
-                      <div
-                        key={card.key}
-                        style={{
-                          backgroundColor: card.bg,
-                          border: `1px solid ${card.color}30`,
-                          borderRadius: '12px',
-                          padding: '20px',
-                          boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
-                        }}
-                      >
-                        <span style={{ fontSize: '12px', fontWeight: '600', color: card.color }}>{card.title}</span>
-                        <h3 style={{ fontSize: '20px', fontWeight: '800', margin: '8px 0 4px 0', color: '#0f172a' }}>{card.value}</h3>
-                        <span style={{ fontSize: '11px', color: '#64748b' }}>{card.count}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* SEARCHED CLIENTS MATCHING TABLE */}
-                  <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.03)' }}>
-                    <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '16px' }}>Matching Client Records</h3>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', textAlign: 'left' }}>
-                      <thead>
-                        <tr style={{ backgroundColor: '#f8fafc', color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>
-                          <th style={{ padding: '12px' }}>Client ID</th>
-                          <th style={{ padding: '12px' }}>Client Name</th>
-                          <th style={{ padding: '12px' }}>Account Code</th>
-                          <th style={{ padding: '12px' }}>Linked Acfile Ref</th>
-                          <th style={{ padding: '12px' }}>Status</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredClients.length > 0 ? (
-                          filteredClients.map((c) => (
-                            <tr key={c.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                              <td style={{ padding: '12px', fontWeight: '600' }}>{c.id}</td>
-                              <td style={{ padding: '12px' }}>{c.name}</td>
-                              <td style={{ padding: '12px' }}>{c.code}</td>
-                              <td style={{ padding: '12px', color: '#64748b' }}>{c.acFileRef}</td>
-                              <td style={{ padding: '12px' }}>
-                                <span style={{ padding: '2px 8px', borderRadius: '10px', fontSize: '10px', fontWeight: '700', backgroundColor: '#dcfce7', color: '#15803d' }}>
-                                  {c.status}
-                                </span>
-                              </td>
-                            </tr>
-                          ))
-                        ) : (
-                          <tr>
-                            <td colSpan="5" style={{ padding: '16px', textAlign: 'center', color: '#64748b' }}>
-                              No client found matching "{searchQuery}"
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
+                <div style={{ fontSize: "12px", color: t.textSecondary, fontWeight: "500", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  User Name: {companyData?.UName || "N/A"}
                 </div>
-              )}
-            </div>
-          )}
-
-          {/* OTHER SUB-PAGES */}
-          {activePage !== 'dashboard' && (
-            <div style={{ backgroundColor: '#ffffff', padding: '32px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-              <h2 style={{ fontSize: '20px', fontWeight: '700', textTransform: 'capitalize' }}>{activePage} Management Page</h2>
-              <p style={{ fontSize: '13px', color: '#64748b', marginTop: '8px' }}>
-                Viewing detailed records for <strong>{activePage.toUpperCase()}</strong> synced from local ERP files.
-              </p>
-            </div>
-          )}
-
-        </main>
+                <div style={{ fontSize: "13px", color: "#34d399", fontWeight: "600" }}>
+                  Limit: {companyData?.Limit ? companyData.Limit.toLocaleString() : "0"}
+                </div>
+                <div style={{ fontSize: "12px", color: t.textSecondary, fontWeight: "500" }}>
+                  Status: {companyData?.Active ? "Active" : "Inactive"}
+                </div>
+              </div>
+            </section>
+          </div>
+        )}
       </div>
 
+      {/* ================= MAIN CONTENT ================= */}
+      <main
+        style={{
+          padding: "16px 12px",
+          paddingTop: selectedAction === null ? "180px" : "65px",
+          maxWidth: "800px",
+          margin: "0 auto",
+          boxSizing: "border-box",
+        }}
+      >
+        {selectedAction ? (
+          <div
+            style={{
+              backgroundColor: t.cardBg,
+              border: `1px solid ${t.cardBorder}`,
+              borderRadius: "16px",
+              padding: "24px 16px",
+              textAlign: "center",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+              marginTop: "10px",
+              boxSizing: "border-box",
+            }}
+          >
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                setSelectedAction(null);
+              }}
+              style={{
+                marginBottom: "20px",
+                padding: "8px 16px",
+                backgroundColor: "#10b981",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontWeight: "600",
+                fontSize: "13px",
+              }}
+            >
+              ← Back to Dashboard
+            </button>
+            <h2 style={{ fontSize: "20px", fontWeight: "bold", marginBottom: "8px", color: t.textPrimary }}>
+              {selectedAction}
+            </h2>
+            <p style={{ fontSize: "14px", color: t.textSecondary, fontWeight: "500" }}>
+              Coming Soon...
+            </p>
+          </div>
+        ) : (
+          <>
+            <h2 style={{ fontSize: "15px", fontWeight: "600", marginBottom: "12px", color: t.textPrimary }}>
+              Quick Actions
+            </h2>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
+                gap: "12px",
+                marginBottom: "24px",
+              }}
+            >
+              {actionButtons.map((btn, index) => (
+                <button
+                  key={index}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setSelectedAction(btn.name);
+                  }}
+                  style={{
+                    backgroundColor: t.cardBg,
+                    border: `1px solid ${t.cardBorder}`,
+                    borderRadius: "14px",
+                    padding: "22px 16px",
+                    textAlign: "left",
+                    cursor: "pointer",
+                    boxShadow: "0 3px 8px rgba(0,0,0,0.08)",
+                    transition: "all 0.2s ease",
+                    color: t.textPrimary,
+                    boxSizing: "border-box",
+                    width: "100%",
+                  }}
+                >
+                  <div style={{ fontSize: "15px", fontWeight: "bold", marginBottom: "4px" }}>
+                    {btn.name}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+      </main>
+
+      {/* ================= SIDEBAR DRAWER ================= */}
+      {isSidebarOpen && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.6)",
+            zIndex: 1000,
+            display: "flex",
+          }}
+          onClick={(e) => {
+            e.preventDefault();
+            setIsSidebarOpen(false);
+          }}
+        >
+          <div
+            style={{
+              width: "240px",
+              maxWidth: "80%",
+              height: "100%",
+              backgroundColor: t.sidebarBg,
+              color: t.sidebarText,
+              borderRight: `1px solid ${t.cardBorder}`,
+              padding: "16px",
+              boxSizing: "border-box",
+              display: "flex",
+              flexDirection: "column",
+              gap: "16px",
+              boxShadow: "5px 0 25px rgba(0,0,0,0.5)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: "16px", fontWeight: "bold", color: t.sidebarText }}>
+                Menu
+              </span>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  setIsSidebarOpen(false);
+                }}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: t.textSecondary,
+                  fontSize: "18px",
+                  cursor: "pointer",
+                  padding: "4px",
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  toggleTheme();
+                }}
+                style={{
+                  width: "100%",
+                  padding: "10px 12px",
+                  backgroundColor: currentTheme === "dark" ? "rgba(255,255,255,0.08)" : "#f4f4f5",
+                  border: `1px solid ${t.cardBorder}`,
+                  borderRadius: "8px",
+                  color: t.sidebarText,
+                  fontSize: "13px",
+                  textAlign: "left",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  fontWeight: "500",
+                }}
+              >
+                <span>{currentTheme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

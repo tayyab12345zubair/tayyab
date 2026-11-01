@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { apiRequest } from "@/services/apiService";
+import { apiRequest, fetchPermissionsAndCompanies } from "@/services/apiService";
 import { wsService } from "@/services/websocketService";
 import { LoginModel, LoginResult } from "@/types/auth";
+import { authStore } from "@/store/authStore";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,20 +28,53 @@ export default function LoginPage() {
         rememberMe: false,
       };
 
-      const result = await apiRequest<LoginResult>("/api/Login/LoginNewDdts", "POST", payload);
+      const result = await apiRequest<LoginResult & { userId?: number; id?: number; subId?: number }>(
+        "/api/Login/LoginNewDdts",
+        "POST",
+        payload
+      );
 
-      if (result && result.successful) {
-        // Securely store token in an HttpOnly-equivalent cookie or let backend handle it,
-        // while satisfying the reviewer's requirement.
+      if (result && result.successful && result.token) {
         document.cookie = `auth_token=${result.token}; path=/; secure; samesite=lax`;
+        authStore.setToken(result.token);
+
+        // Extract ID (result.id is 576)
+        const userId = result.id || result.userId || result.subId || 1;
+
+        // Fetch Hardcoded Users Permissions & Company List
+        const { companyRes } = await fetchPermissionsAndCompanies(userId);
+
+        // Safe check using optional chaining and double check for array/data existence
+        const companies = companyRes?.ResultObj;
+
+        if (!companies || !Array.isArray(companies) || companies.length === 0) {
+          setErrorMsg("No Parties Found");
+          setIsLoading(false);
+          return;
+        }
+
+        // Save first company & proceed directly to dashboard
+        const selectedCompany = companies[0];
+        authStore.setSelectedCompany(selectedCompany);
 
         wsService.connect();
         router.push("/dashboard");
       } else {
         setErrorMsg(result?.error || "Login failed. Please check your credentials.");
       }
-    } catch (err) {
-      setErrorMsg("An error occurred during login. Please try again.");
+    } catch (err: any) {
+      // Parse backend validation error if available
+      try {
+        const errJson = JSON.parse(err.message);
+        if (errJson && errJson.errors) {
+          const firstKey = Object.keys(errJson.errors)[0];
+          setErrorMsg(errJson.errors[firstKey][0] || "Validation error occurred.");
+        } else {
+          setErrorMsg(errJson.title || "An error occurred during login.");
+        }
+      } catch {
+        setErrorMsg(err.message || "An error occurred during login. Please try again.");
+      }
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -73,7 +107,6 @@ export default function LoginPage() {
           gap: "16px",
         }}
       >
-        {/* Logo */}
         <div style={{ marginBottom: "10px" }}>
           <Image
             src="/Logo.png"
@@ -101,7 +134,6 @@ export default function LoginPage() {
           </div>
         )}
 
-        {/* Username Input */}
         <div style={{ width: "100%" }}>
           <input
             type="text"
@@ -122,7 +154,6 @@ export default function LoginPage() {
           />
         </div>
 
-        {/* Password Input with Show/Hide */}
         <div style={{ width: "100%", position: "relative", display: "flex", alignItems: "center" }}>
           <input
             type={showPassword ? "text" : "password"}
@@ -139,7 +170,7 @@ export default function LoginPage() {
               fontSize: "14px",
               outline: "none",
             }}
-            placeholder="Password"
+            placeholder="Password (min 6 digits)"
           />
           <button
             type="button"
@@ -159,7 +190,6 @@ export default function LoginPage() {
           </button>
         </div>
 
-        {/* Login Button */}
         <button
           type="submit"
           disabled={isLoading}

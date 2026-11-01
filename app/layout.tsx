@@ -1,5 +1,4 @@
 import type { Metadata } from "react";
-import { cookies } from "next/headers";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -7,16 +6,13 @@ export const metadata: Metadata = {
   description: "Secure Next.js dashboard with real-time updates",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const cookieStore = await cookies();
-  const theme = cookieStore.get("theme")?.value || "dark";
-
   return (
-    <html lang="en" data-theme={theme}>
+    <html lang="en" data-theme="dark">
       <body suppressHydrationWarning>
         {children}
       </body>

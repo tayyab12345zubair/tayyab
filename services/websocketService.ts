@@ -4,40 +4,21 @@ import { authStore } from "@/store/authStore";
 class WebSocketService {
   private connection: signalR.HubConnection | null = null;
 
-  connect() {
-    const rawBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-    if (!rawBaseUrl) return;
-
-    // Remove trailing slash if present to avoid double slashes
-    const baseUrl = rawBaseUrl.replace(/\/$/, "");
+  public connect() {
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+    if (this.connection) return;
 
     this.connection = new signalR.HubConnectionBuilder()
-      .withUrl(`${baseUrl}/RefreshHub`)
-      .withAutomaticReconnect()
+      .withUrl(`${baseUrl}/RefreshHub`, {
+        accessTokenFactory: () => authStore.getToken() ?? "",
+      })
+      .withAutomaticReconnect([0, 2000, 2000, 2000, 5000, 5000, 10000, 15000, 30000])
       .build();
 
-    this.connection.start()
-      .then(() => {
-        console.log("WebSocket Connected successfully.");
-        this.sendLoginSignal();
-      })
-      .catch(err => console.error("WebSocket Connection Error: ", err));
-
-    this.connection.onreconnected(() => {
-      console.log("WebSocket Reconnected.");
-      this.sendLoginSignal();
-    });
+    this.connection.start().catch((err) => console.error("SignalR Connection Error: ", err));
   }
 
-  private sendLoginSignal() {
-    const userId = authStore.getUserId();
-    if (this.connection && userId !== null) {
-      this.connection.invoke("LogIn", userId.toString())
-        .catch(err => console.error("Error invoking LogIn on hub: ", err));
-    }
-  }
-
-  disconnect() {
+  public disconnect() {
     if (this.connection) {
       this.connection.stop();
       this.connection = null;
