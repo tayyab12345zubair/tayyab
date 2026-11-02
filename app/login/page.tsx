@@ -1,85 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useActionState, useState } from "react";
 import Image from "next/image";
-import { apiRequest, fetchPermissionsAndCompanies } from "@/services/apiService";
-import { wsService } from "@/services/websocketService";
-import { LoginModel, LoginResult } from "@/types/auth";
-import { authStore } from "@/store/authStore";
-
+import { handleServerLogin } from "@/app/login/actions";
 export default function LoginPage() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [state, formAction, isPending] = useActionState(handleServerLogin, null);
   const [showPassword, setShowPassword] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  async function handleLoginSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setErrorMsg(null);
-    setIsLoading(true);
-
-    try {
-      const payload: LoginModel = {
-        email,
-        password,
-        rememberMe: false,
-      };
-
-      const result = await apiRequest<LoginResult & { userId?: number; id?: number; subId?: number }>(
-        "/api/Login/LoginNewDdts",
-        "POST",
-        payload
-      );
-
-      if (result && result.successful && result.token) {
-        document.cookie = `auth_token=${result.token}; path=/; secure; samesite=lax`;
-        authStore.setToken(result.token);
-
-        // Extract ID (result.id is 576)
-        const userId = result.id || result.userId || result.subId || 1;
-
-        // Fetch Hardcoded Users Permissions & Company List
-        const { companyRes } = await fetchPermissionsAndCompanies(userId);
-
-        // Safe check using optional chaining and double check for array/data existence
-        const companies = companyRes?.ResultObj;
-
-        if (!companies || !Array.isArray(companies) || companies.length === 0) {
-          setErrorMsg("No Parties Found");
-          setIsLoading(false);
-          return;
-        }
-
-        // Save first company & proceed directly to dashboard
-        const selectedCompany = companies[0];
-        authStore.setSelectedCompany(selectedCompany);
-
-        wsService.connect();
-        router.push("/dashboard");
-      } else {
-        setErrorMsg(result?.error || "Login failed. Please check your credentials.");
-      }
-    } catch (err: any) {
-      // Parse backend validation error if available
-      try {
-        const errJson = JSON.parse(err.message);
-        if (errJson && errJson.errors) {
-          const firstKey = Object.keys(errJson.errors)[0];
-          setErrorMsg(errJson.errors[firstKey][0] || "Validation error occurred.");
-        } else {
-          setErrorMsg(errJson.title || "An error occurred during login.");
-        }
-      } catch {
-        setErrorMsg(err.message || "An error occurred during login. Please try again.");
-      }
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  }
 
   return (
     <div
@@ -97,7 +23,7 @@ export default function LoginPage() {
       }}
     >
       <form
-        onSubmit={handleLoginSubmit}
+        action={formAction}
         style={{
           width: "100%",
           maxWidth: "320px",
@@ -117,7 +43,7 @@ export default function LoginPage() {
           />
         </div>
 
-        {errorMsg && (
+        {state?.error && (
           <div
             style={{
               width: "100%",
@@ -130,15 +56,14 @@ export default function LoginPage() {
               textAlign: "center",
             }}
           >
-            {errorMsg}
+            {state.error}
           </div>
         )}
 
         <div style={{ width: "100%" }}>
           <input
             type="text"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            name="email"
             required
             style={{
               width: "100%",
@@ -157,8 +82,7 @@ export default function LoginPage() {
         <div style={{ width: "100%", position: "relative", display: "flex", alignItems: "center" }}>
           <input
             type={showPassword ? "text" : "password"}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            name="password"
             required
             style={{
               width: "100%",
@@ -192,7 +116,7 @@ export default function LoginPage() {
 
         <button
           type="submit"
-          disabled={isLoading}
+          disabled={isPending}
           style={{
             width: "100%",
             padding: "12px",
@@ -202,12 +126,12 @@ export default function LoginPage() {
             borderRadius: "8px",
             fontWeight: "bold",
             fontSize: "14px",
-            cursor: isLoading ? "not-allowed" : "pointer",
+            cursor: isPending ? "not-allowed" : "pointer",
             transition: "background 0.2s ease",
             marginTop: "4px",
           }}
         >
-          {isLoading ? "Logging in..." : "Login"}
+          {isPending ? "Logging in..." : "Login"}
         </button>
       </form>
     </div>
