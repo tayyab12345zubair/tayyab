@@ -1,4 +1,4 @@
-"use client";
+"use server";
 
 import { useActionState, useState } from "react";
 import Image from "next/image";
