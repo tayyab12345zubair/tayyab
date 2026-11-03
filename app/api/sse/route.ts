@@ -1,13 +1,17 @@
+// app/api/sse/route.ts
 export async function GET() {
   const encoder = new TextEncoder();
+
   const stream = new ReadableStream({
     start(controller) {
-      // Yahan aap apne backend/SignalR/Hub events sun sakte hain
-      const interval = setInterval(() => {
-        controller.enqueue(encoder.encode("data: refresh\n\n"));
-      }, 15000); // 15 seconds ya event-driven trigger
+      // Yahan aap apne backend Hub/WebSocket event listener ko connect kar sakte hain
+      const pingInterval = setInterval(() => {
+        controller.enqueue(encoder.encode("data: ping\n\n"));
+      }, 30000);
 
-      return () => clearInterval(interval);
+      return () => {
+        clearInterval(pingInterval);
+      };
     },
   });
 
