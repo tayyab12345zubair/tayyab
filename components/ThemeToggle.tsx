@@ -1,20 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-export default function ThemeToggle() {
-  const [theme, setTheme] = useState<string>("dark");
-
-  useEffect(() => {
-    const currentTheme = document.documentElement.getAttribute("data-theme") || "dark";
-    setTheme(currentTheme);
-  }, []);
+export default function ThemeToggleClient({ initialTheme }: { initialTheme: string }) {
+  const [theme, setTheme] = useState<string>(initialTheme);
 
   const toggleTheme = () => {
     const newTheme = theme === "dark" ? "light" : "dark";
     setTheme(newTheme);
     document.documentElement.setAttribute("data-theme", newTheme);
-    // Persist theme in cookie for 1 year so server can read it on next request
     document.cookie = `theme=${newTheme}; path=/; max-age=31536000; SameSite=Lax`;
   };
 

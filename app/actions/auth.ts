@@ -36,7 +36,11 @@ export async function loginAction(formData: FormData) {
       path: "/",
       maxAge: 60 * 60 * 24 * 7, // 1 week
     });
-  } catch (err) {
+  } catch (_err) {
+    // Note: Do not catch NEXT_REDIRECT error if thrown by redirect()
+    if (_err instanceof Error && _err.message === "NEXT_REDIRECT") {
+      throw _err;
+    }
     return { error: "An unexpected error occurred during login." };
   }
 
