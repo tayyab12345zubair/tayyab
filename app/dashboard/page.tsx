@@ -1,10 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { authStore } from "@/store/authStore";
-import { CDRelation } from "@/services/apiService";
 
 interface ActionButton {
   name: string;
@@ -12,9 +10,14 @@ interface ActionButton {
 }
 
 export default function DashboardPage() {
-  const router = useRouter();
-
-  const [companyData, setCompanyData] = useState<CDRelation | null>(null);
+  // Initial state directly from store to avoid setState in effect
+ // Srf state variable rakhain, setter hata dein agar zaroorat nahi
+const [companyData] = useState(() => {
+  if (typeof window !== "undefined") {
+    return authStore.getSelectedCompany();
+  }
+  return null;
+});
   const [currentDateTime, setCurrentDateTime] = useState({
     date: "",
     time: "",
@@ -25,12 +28,6 @@ export default function DashboardPage() {
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
 
   useEffect(() => {
-    // Get stored company data from authStore
-    const activeCompany = authStore.getSelectedCompany();
-    if (activeCompany) {
-      setCompanyData(activeCompany);
-    }
-
     const updateDateTime = () => {
       const now = new Date();
       const dateStr = now.toLocaleDateString("en-GB");
@@ -43,10 +40,20 @@ export default function DashboardPage() {
     return () => clearInterval(interval);
   }, []);
 
-  function handleLogout(e: React.MouseEvent) {
+  async function handleLogout(e: React.MouseEvent) {
     e.preventDefault();
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch {
+      // Ignore network errors on logout
+    }
+
     authStore.clearSession();
-    router.push("/login");
+
+    document.cookie = "app_session=; Max-Age=0; path=/;";
+    document.cookie = "session=; Max-Age=0; path=/;";
+
+    window.location.replace("/login");
   }
 
   function toggleTheme() {
@@ -54,6 +61,7 @@ export default function DashboardPage() {
     setIsSidebarOpen(false);
   }
 
+  // Baqi poora code waisa hi rahega (Header, main content, sidebar, etc.)
   const themeStyles = {
     dark: {
       bg: "#121212",

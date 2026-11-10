@@ -1,54 +1,33 @@
-class AuthStore {
-  private token: string | null = null;
-  private selectedCompany: any | null = null;
-  private permissions: any | null = null;
-
-  constructor() {
-    if (typeof window !== "undefined") {
-      this.token = localStorage.getItem("auth_token") || null;
-    }
-  }
-
-  public getToken(): string | null {
-    if (!this.token && typeof window !== "undefined") {
-      const match = document.cookie.match(new RegExp('(^| )auth_token=([^;]+)'));
-      if (match) this.token = match[2];
-    }
-    return this.token;
-  }
-
-  public setToken(token: string) {
-    this.token = token;
-    if (typeof window !== "undefined") {
-      localStorage.setItem("auth_token", token);
-    }
-  }
-
-  public setSelectedCompany(company: any) {
-    this.selectedCompany = company;
-  }
-
-  public getSelectedCompany() {
-    return this.selectedCompany;
-  }
-
-  public setPermissions(perms: any) {
-    this.permissions = perms;
-  }
-
-  public getPermissions() {
-    return this.permissions;
-  }
-
-  public clearSession() {
-    this.token = null;
-    this.selectedCompany = null;
-    this.permissions = null;
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("auth_token");
-      document.cookie = "auth_token=; path=/; max-age=0";
-    }
-  }
+// store/authStore.ts
+export interface CompanyRelation {
+  pcode?: string;
+  enabled?: boolean;
+  rCode?: string;
+  City?: string;
+  UName?: string;
+  PName?: string;
+  Limit?: number;
+  Active?: boolean;
+  [key: string]: unknown;
 }
 
-export const authStore = new AuthStore();
+export const authStore = {
+  getSelectedCompany(): CompanyRelation | null {
+    if (typeof window === "undefined") return null;
+    const data = localStorage.getItem("selected_company");
+    return data ? JSON.parse(data) : null;
+  },
+
+  setSelectedCompany(company: CompanyRelation) {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("selected_company", JSON.stringify(company));
+    }
+  },
+
+  clearSession() {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("selected_company");
+      localStorage.clear();
+    }
+  },
+};

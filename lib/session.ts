@@ -11,7 +11,7 @@ export interface SessionData {
   userId: number | string;
   Mbm?: string | number;
   tokenExpiry?: string;
-  selectedCompany: any;
+  selectedCompany: Record<string, unknown>; // 'any' ki jagah yeh use karein
 }
 
 // Session ko encrypt karke opaque JWT cookie mein store karna

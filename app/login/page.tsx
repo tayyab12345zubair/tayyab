@@ -1,114 +1,84 @@
-"use server";
+"use client";
 
-import { useActionState, useState } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { handleServerLogin } from "@/app/login/actions";
+
 export default function LoginPage() {
-  const [state, formAction, isPending] = useActionState(handleServerLogin, null);
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email");
+    const password = formData.get("password");
+
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Login failed");
+        setLoading(false);
+        return;
+      }
+
+      // Real token & session created successfully, redirect to dashboard
+      router.push("/dashboard");
+      router.refresh();
+    } catch {
+      setError("Network error occurred");
+      setLoading(false);
+    }
+  }
+
   return (
-    <div
-      style={{
-        width: "100%",
-        minHeight: "100vh",
-        backgroundColor: "#121212",
-        color: "#ffffff",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        fontFamily: "sans-serif",
-        padding: "20px",
-      }}
-    >
-      <form
-        action={formAction}
-        style={{
-          width: "100%",
-          maxWidth: "320px",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "16px",
-        }}
-      >
-        <div style={{ marginBottom: "10px" }}>
-          <Image
-            src="/Logo.png"
-            alt="Logo"
-            width={160}
-            height={160}
-            style={{ objectFit: "contain" }}
-          />
+    <div style={{ width: "100%", minHeight: "100vh", backgroundColor: "#121212", color: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <form onSubmit={handleSubmit} style={{ width: "100%", maxWidth: "400px", padding: "24px", boxSizing: "border-box" }}>
+        <div style={{ textAlign: "center", marginBottom: "44px" }}>
+          <Image src="/Logo.png" alt="Logo" width={100} height={160} priority />
+          <h1 style={{ fontSize: "20px", fontWeight: "bold", marginTop: "12px" }}>Sign In</h1>
         </div>
 
-        {state?.error && (
-          <div
-            style={{
-              width: "100%",
-              padding: "8px",
-              backgroundColor: "rgba(239, 68, 68, 0.15)",
-              border: "1px solid rgba(239, 68, 68, 0.3)",
-              color: "#ef4444",
-              borderRadius: "6px",
-              fontSize: "12px",
-              textAlign: "center",
-            }}
-          >
-            {state.error}
+        {error && (
+          <div style={{ padding: "10px", marginBottom: "16px", backgroundColor: "rgba(239, 68, 68, 0.15)", border: "1px solid rgba(239, 68, 68, 0.3)", borderRadius: "8px", color: "#ef4444", fontSize: "13px", textAlign: "center" }}>
+            {error}
           </div>
         )}
 
-        <div style={{ width: "100%" }}>
+        <div style={{ marginBottom: "16px" }}>
           <input
             type="text"
             name="email"
             required
-            style={{
-              width: "100%",
-              padding: "12px 14px",
-              borderRadius: "8px",
-              border: "1px solid #2a2a2a",
-              backgroundColor: "#1a1a1a",
-              color: "#ffffff",
-              fontSize: "14px",
-              outline: "none",
-            }}
             placeholder="Username"
+            style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1px solid #2a2a2a", backgroundColor: "#1a1a1a", color: "#ffffff", boxSizing: "border-box" }}
           />
         </div>
 
-        <div style={{ width: "100%", position: "relative", display: "flex", alignItems: "center" }}>
+        <div style={{ marginBottom: "24px", position: "relative" }}>
           <input
             type={showPassword ? "text" : "password"}
             name="password"
             required
-            style={{
-              width: "100%",
-              padding: "12px 50px 12px 14px",
-              borderRadius: "8px",
-              border: "1px solid #2a2a2a",
-              backgroundColor: "#1a1a1a",
-              color: "#ffffff",
-              fontSize: "14px",
-              outline: "none",
-            }}
-            placeholder="Password (min 6 digits)"
+            placeholder="Password"
+            style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1px solid #2a2a2a", backgroundColor: "#1a1a1a", color: "#ffffff", boxSizing: "border-box" }}
           />
           <button
             type="button"
-            onClick={() => setShowPassword((prev) => !prev)}
-            style={{
-              position: "absolute",
-              right: "14px",
-              background: "none",
-              border: "none",
-              color: "#888888",
-              cursor: "pointer",
-              fontSize: "13px",
-              fontWeight: "500",
-            }}
+            onClick={() => setShowPassword(!showPassword)}
+            style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "#888888", cursor: "pointer", fontSize: "12px" }}
           >
             {showPassword ? "Hide" : "Show"}
           </button>
@@ -116,22 +86,10 @@ export default function LoginPage() {
 
         <button
           type="submit"
-          disabled={isPending}
-          style={{
-            width: "100%",
-            padding: "12px",
-            backgroundColor: "#5856d6",
-            color: "#ffffff",
-            border: "none",
-            borderRadius: "8px",
-            fontWeight: "bold",
-            fontSize: "14px",
-            cursor: isPending ? "not-allowed" : "pointer",
-            transition: "background 0.2s ease",
-            marginTop: "4px",
-          }}
+          disabled={loading}
+          style={{ width: "100%", padding: "12px", backgroundColor: "#10b981", color: "#ffffff", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" }}
         >
-          {isPending ? "Logging in..." : "Login"}
+          {loading ? "Signing in..." : "Login"}
         </button>
       </form>
     </div>

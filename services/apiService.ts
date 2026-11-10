@@ -11,7 +11,8 @@ export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): 
   if (response.status === 401) {
     // Unauthorized: Redirect to login or handle session expiry
     if (typeof window !== "undefined") {
-      window.location.href = "/login";
+     // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+window.location.href = "/login";
     }
     throw new Error("Unauthorized session");
   }
