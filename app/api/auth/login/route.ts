@@ -1,29 +1,20 @@
 import { NextResponse } from "next/server";
 import { createSession } from "@/lib/session";
+import { authenticateUser, fetchCompanyList } from "@/services/apiService";
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 export async function POST(request: Request) {
   try {
     const { email, password } = await request.json();
-    const baseUrl = "https://webapistaging-bxbefmgmbgh0fyg3.uaenorth-01.azurewebsites.net";
 
-    // Timeout controller for Azure Staging API (6 seconds limit)
+    // Timeout controller for login (6 seconds limit)
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 6000);
 
-    let loginRes;
+    let result;
     try {
-      loginRes = await fetch(`${baseUrl}/api/Login/LoginNewDdts`, {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        body: JSON.stringify({ email, password, rememberMe: false }),
-        cache: "no-store",
-        signal: controller.signal,
-      });
+      result = await authenticateUser({ email, password, rememberMe: false }, controller.signal);
     } catch {
       clearTimeout(timeoutId);
       return NextResponse.json(
@@ -31,49 +22,36 @@ export async function POST(request: Request) {
         { status: 504 }
       );
     }
+
     clearTimeout(timeoutId);
 
-    if (!loginRes.ok) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
-    }
-
-    const result = await loginRes.json();
-    
     if (!result || !result.successful || !result.token) {
-      return NextResponse.json({ error: result?.message || "Authentication failed from server" }, { status: 400 });
+      return NextResponse.json({ error: result?.message || result?.error || "Authentication failed" }, { status: 400 });
     }
 
     const token = result.token;
     const userId = result.id || result.userId;
 
-  
     if (!userId) {
       return NextResponse.json({ error: "User ID missing from authentication response" }, { status: 400 });
     }
 
     const Mbm = result.mbm || result.Mbm;
 
-    // Fast company fetch with a short 2-second timeout so login never hangs
+    // Fast company fetch with a short 2-second timeout
     let selectedCompany = { pcode: "PAK", enabled: true };
     try {
       const companyController = new AbortController();
-      const companyTimeoutId = setTimeout(() => companyController.abort(), 2000);
+      const companyTimeout = setTimeout(() => companyController.abort(), 2000);
 
-      const companyRes = await fetch(`${baseUrl}/api/Company/GetCompanyList/${userId}/true`, {
-        method: "GET",
-        headers: { "Authorization": `Bearer ${token}` },
-        cache: "no-store",
-        signal: companyController.signal,
-      }).then((res) => res.json()).catch(() => []);
+      const companies = await fetchCompanyList(userId, token, companyController.signal);
+      clearTimeout(companyTimeout);
 
-      clearTimeout(companyTimeoutId);
-
-      const companies = Array.isArray(companyRes) ? companyRes : (companyRes?.ResultObj || []);
       if (companies.length > 0) {
         selectedCompany = companies[0];
       }
     } catch {
-      // Fallback to default company object if company list fails or times out
+      // Fallback to default company if fetch takes too long
     }
 
     // Securely store JWT token inside httpOnly session cookie

@@ -1,26 +1,84 @@
-// services/apiService.ts (Server/Client safe wrapper)
-export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const response = await fetch(endpoint, {
-    ...options,
+// services/apiService.ts
+
+export const API_BASE_URL = "https://webapistaging-bxbefmgmbgh0fyg3.uaenorth-01.azurewebsites.net";
+
+export interface LoginPayload {
+  email: string;
+  password: string;
+  rememberMe?: boolean;
+}
+
+export interface LoginResult {
+  successful: boolean;
+  token?: string;
+  id?: number | string;
+  userId?: number | string;
+  mbm?: string | number;
+  Mbm?: string | number;
+  message?: string;
+  error?: string;
+}
+
+export interface CompanyRelation {
+  pcode?: string;
+  enabled?: boolean;
+  rCode?: string;
+  City?: string;
+  UName?: string;
+  PName?: string;
+  Limit?: number;
+  Active?: boolean;
+  [key: string]: unknown;
+}
+
+/**
+ * Get standardized authorization headers for API requests.
+ */
+export function getAuthHeaders(token: string) {
+  return {
+    "Authorization": `Bearer ${token}`,
+    "Accept": "application/json",
+    "Content-Type": "application/json",
+  };
+}
+
+/**
+ * Dedicated service function for external login API call.
+ */
+export async function authenticateUser(payload: LoginPayload, signal?: AbortSignal): Promise<LoginResult> {
+  const res = await fetch(`${API_BASE_URL}/api/Login/LoginNewDdts`, {
+    method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...options.headers,
+      "Accept": "application/json",
     },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+    signal,
   });
 
-  if (response.status === 401) {
-    // Unauthorized: Redirect to login or handle session expiry
-    if (typeof window !== "undefined") {
-     // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-window.location.href = "/login";
-    }
-    throw new Error("Unauthorized session");
+  if (!res.ok) {
+    throw new Error("Invalid credentials or API server error");
   }
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || "API request failed");
+  return res.json();
+}
+
+/**
+ * Dedicated service function for fetching company list securely using centralized base URL and headers.
+ */
+export async function fetchCompanyList(userId: number | string, token: string, signal?: AbortSignal): Promise<CompanyRelation[]> {
+  const res = await fetch(`${API_BASE_URL}/api/Company/GetCompanyList/${userId}/true`, {
+    method: "GET",
+    headers: getAuthHeaders(token),
+    cache: "no-store",
+    signal,
+  });
+
+  if (!res.ok) {
+    return [];
   }
 
-  return response.json();
+  const data = await res.json();
+  return Array.isArray(data) ? data : (data?.ResultObj || []);
 }
