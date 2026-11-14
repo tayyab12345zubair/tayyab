@@ -48,7 +48,7 @@ export default function LoginPage() {
       <form onSubmit={handleSubmit} style={{ width: "100%", maxWidth: "400px", padding: "24px", boxSizing: "border-box" }}>
         <div style={{ textAlign: "center", marginBottom: "44px" }}>
           <Image src="/Logo.png" alt="Logo" width={100} height={160} priority />
-          <h1 style={{ fontSize: "20px", fontWeight: "bold", marginTop: "12px" }}>Sign In</h1>
+          
         </div>
 
         {error && (
