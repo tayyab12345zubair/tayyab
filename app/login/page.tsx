@@ -12,12 +12,27 @@ export default function LoginPage() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setLoading(true);
     setError(null);
 
     const formData = new FormData(e.currentTarget);
-    const email = formData.get("email");
-    const password = formData.get("password");
+    const email = (formData.get("email") as string || "").trim();
+    const password = (formData.get("password") as string || "").trim();
+
+    // 1. Validation: Username must be lowercase letters and numbers only
+    const usernameRegex = /^[a-z0-9]+$/;
+    if (!usernameRegex.test(email)) {
+      setError("Username must contain only small letters and numbers (no capitals or spaces).");
+      return;
+    }
+
+    // 2. Validation: Password must be numeric only
+    const numericRegex = /^[0-9]+$/;
+    if (!numericRegex.test(password)) {
+      setError("Password must contain numbers only.");
+      return;
+    }
+
+    setLoading(true);
 
     try {
       const res = await fetch("/api/auth/login", {
@@ -34,7 +49,7 @@ export default function LoginPage() {
         return;
       }
 
-      // Real token & session created successfully, redirect to dashboard
+      // Successful login, redirect to dashboard
       router.push("/dashboard");
       router.refresh();
     } catch {
@@ -48,7 +63,6 @@ export default function LoginPage() {
       <form onSubmit={handleSubmit} style={{ width: "100%", maxWidth: "400px", padding: "24px", boxSizing: "border-box" }}>
         <div style={{ textAlign: "center", marginBottom: "44px" }}>
           <Image src="/Logo.png" alt="Logo" width={100} height={160} priority />
-          
         </div>
 
         {error && (
@@ -62,8 +76,25 @@ export default function LoginPage() {
             type="text"
             name="email"
             required
-            placeholder="Username"
-            style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1px solid #2a2a2a", backgroundColor: "#1a1a1a", color: "#ffffff", boxSizing: "border-box" }}
+            placeholder="Username (small letters & numbers only)"
+            autoCapitalize="none"
+            autoComplete="off"
+            spellCheck="false"
+            onInput={(e) => {
+              const target = e.currentTarget;
+              // Automatically convert capitals to small letters and remove non-alphanumeric chars
+              target.value = target.value.toLowerCase().replace(/[^a-z0-9]/g, "");
+            }}
+            style={{ 
+              width: "100%", 
+              padding: "12px 14px", 
+              borderRadius: "8px", 
+              border: "1px solid #2a2a2a", 
+              backgroundColor: "#1a1a1a", 
+              color: "#ffffff", 
+              boxSizing: "border-box",
+              textTransform: "lowercase" 
+            }}
           />
         </div>
 
@@ -72,7 +103,13 @@ export default function LoginPage() {
             type={showPassword ? "text" : "password"}
             name="password"
             required
-            placeholder="Password"
+            placeholder="Password (numeric only)"
+            inputMode="numeric"
+            onInput={(e) => {
+              const target = e.currentTarget;
+              // Automatically strip non-numeric characters for password
+              target.value = target.value.replace(/[^0-9]/g, "");
+            }}
             style={{ width: "100%", padding: "12px 14px", borderRadius: "8px", border: "1px solid #2a2a2a", backgroundColor: "#1a1a1a", color: "#ffffff", boxSizing: "border-box" }}
           />
           <button
