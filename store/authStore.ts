@@ -1,4 +1,5 @@
 // store/authStore.ts
+
 export interface CompanyRelation {
   pcode?: string;
   enabled?: boolean;
@@ -12,6 +13,11 @@ export interface CompanyRelation {
 }
 
 export const authStore = {
+  getToken(): string | null {
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem("auth_token");
+  },
+
   getSelectedCompany(): CompanyRelation | null {
     if (typeof window === "undefined") return null;
     const data = localStorage.getItem("selected_company");

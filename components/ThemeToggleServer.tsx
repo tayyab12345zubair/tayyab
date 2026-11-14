@@ -1,9 +1,13 @@
 import { cookies } from "next/headers";
 import ThemeToggleClient from "./ThemeToggleClient";
 
-export default async function ThemeToggle() {
+interface ThemeToggleProps {
+  initialTheme?: string;
+}
+
+export default async function ThemeToggleServer({ initialTheme }: ThemeToggleProps) {
   const cookieStore = await cookies();
-  const themeCookie = cookieStore.get("theme")?.value || "dark";
+  const themeCookie = cookieStore.get("theme")?.value || initialTheme || "dark";
 
   return <ThemeToggleClient initialTheme={themeCookie} />;
 }

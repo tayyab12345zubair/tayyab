@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSession } from "@/lib/session";
-import { authenticateUser, fetchCompanyList } from "@/services/apiService";
-
+import { authenticateUser, fetchCompanyList, CompanyRelation } from "@/services/apiService";
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 export async function POST(request: Request) {
@@ -39,7 +38,7 @@ export async function POST(request: Request) {
     const Mbm = result.mbm || result.Mbm;
 
     // Fast company fetch with a short 2-second timeout
-    let selectedCompany = { pcode: "PAK", enabled: true };
+let selectedCompany: CompanyRelation = { pcode: "PAK", enabled: true };
     try {
       const companyController = new AbortController();
       const companyTimeout = setTimeout(() => companyController.abort(), 2000);

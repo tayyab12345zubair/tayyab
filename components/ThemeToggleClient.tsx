@@ -2,8 +2,12 @@
 
 import { useEffect, useState } from "react";
 
-export default function ThemeToggleClient() {
-  const [dark, setDark] = useState(true);
+interface ThemeToggleClientProps {
+  initialTheme?: string;
+}
+
+export default function ThemeToggleClient({ initialTheme = "dark" }: ThemeToggleClientProps) {
+  const [dark, setDark] = useState(initialTheme === "dark");
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
