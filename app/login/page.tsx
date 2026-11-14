@@ -76,7 +76,7 @@ export default function LoginPage() {
             type="text"
             name="email"
             required
-            placeholder="Username (small letters & numbers only)"
+            placeholder="UserID"
             autoCapitalize="none"
             autoComplete="off"
             spellCheck="false"
@@ -103,7 +103,7 @@ export default function LoginPage() {
             type={showPassword ? "text" : "password"}
             name="password"
             required
-            placeholder="Password (numeric only)"
+            placeholder="Password"
             inputMode="numeric"
             onInput={(e) => {
               const target = e.currentTarget;
